@@ -132,6 +132,7 @@ Present the complete plan in this structure:
 3. **Never make up flight times or accommodation details** — only use what the MCP tools return
 4. **If the user said "entire trip planned out"** — include EVERYTHING: flights, accommodation, daily itinerary, practical info, and budget summary. Don't give a partial plan.
 5. **Save the trip plan** to `${CLAUDE_PLUGIN_DATA}/trips/[destination]-[date].json` for future reference
+6. **Format all links as proper markdown** — `[Book on Ryanair](https://...)` — NOT angle brackets, NOT plain text, NOT `<Ryanair.com>`. This applies to booking links, accommodation links, and all URLs in the plan.
 
 ## Saving Trip Data
 

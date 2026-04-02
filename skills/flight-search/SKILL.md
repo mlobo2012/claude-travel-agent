@@ -25,12 +25,21 @@ Search for flights using live MCP data with full quality verification.
 
 ### Primary Search: Google Flights MCP
 
-Use the `google-flights` MCP server tools to search. Pass:
-- Origin and destination airports
-- Travel dates
-- Number of passengers
-- Cabin class preference
-- Non-stop filter if "direct flights only" requested
+#### Google Flights MCP Parameter Reference
+Use EXACTLY these parameter names — the MCP will reject incorrect names:
+- `departure_date` (NOT `date`) — format: YYYY-MM-DD
+- `return_date` — format: YYYY-MM-DD
+- `origin` — airport IATA code (e.g., LTN, LGW, STN)
+- `destination` — airport IATA code (e.g., CTA)
+- `adults` — number of adult passengers
+- `non_stop` — true/false for direct flights only
+- `currency` — e.g., "GBP"
+
+#### Date Grid Limitation
+The `get_date_grid` tool may not return results for dates more than 2-3 months ahead. For dates further out, skip the date grid and use `search_flights` directly with specific dates.
+
+#### London Airport Handling
+When the user says "London" or "from London" without specifying an airport, search ALL major London airports: LHR (Heathrow), LGW (Gatwick), STN (Stansted), LTN (Luton), SEN (Southend). Present results grouped by airport with the best option highlighted.
 
 ### Cross-Check: Web Search
 
@@ -57,7 +66,7 @@ Present each flight option in this format:
 **Price:** [EXACT PRICE] per person | [TOTAL FOR ALL PASSENGERS] total
 **Verified:** [HH:MM today] via [Source]
 **Class:** [CABIN CLASS]
-**Booking:** [DIRECT URL or "Search on Google Flights: [search URL]"]
+**Booking:** [BOOKING LINK — see Booking Links section below]
 
 > [One-sentence note on why this suits them — e.g., "Direct flight, matches your aisle seat preference"]
 ```
@@ -71,6 +80,18 @@ Verify current prices and availability before booking.
 [If applicable: "Only [source] was available for pricing — not cross-checked."]
 ```
 
+## Booking Links
+
+The Google Flights MCP returns a `booking_token`, NOT a booking URL. You MUST construct booking links manually for the user. ALWAYS include booking links — never present flights without a way to book.
+
+For known airlines, construct direct booking links:
+- **Ryanair:** `[Book on Ryanair](https://www.ryanair.com/gb/en/trip/flights/select?adults=N&dateOut=YYYY-MM-DD&origin=XXX&destination=YYY)`
+- **easyJet:** `[Book on easyJet](https://www.easyjet.com/en/booking/select-flight?origin=XXX&destination=YYY&date=YYYY-MM-DD&adults=N)`
+- **British Airways:** `[Book on British Airways](https://www.britishairways.com/travel/book/public/en_gb?from=XXX&to=YYY&depDate=YYYY-MM-DD&adults=N)`
+- **For other airlines:** `[Book on Google Flights](https://www.google.com/travel/flights/booking?token=BOOKING_TOKEN)`
+
+Format ALL booking links as proper markdown: `[Book on Ryanair](https://...)` — NOT angle brackets, NOT plain text, NOT `<Ryanair.com>`.
+
 ## Preference Matching
 
 Apply the user's flight preferences:
@@ -81,7 +102,7 @@ Apply the user's flight preferences:
 
 ## Special Handling
 
-- **"Direct flights only from London"** → search all London airports (LHR, LGW, STN, LTN, SEN, LCY) unless a specific one is given. Note which airport each result departs from.
+- **"London" or "from London"** → search ALL major London airports: LHR (Heathrow), LGW (Gatwick), STN (Stansted), LTN (Luton), SEN (Southend), LCY (City). Present results grouped by airport with the best option highlighted. Only search a single airport if the user specifies one.
 - **Budget-conscious** → sort by price, highlight cheapest viable option
 - **Flexible dates** → if the MCP supports date range search, use it. Otherwise, search the target date +/- 2 days and present the cheapest option across those dates.
 - **Multi-city** → break into separate searches, present each leg clearly

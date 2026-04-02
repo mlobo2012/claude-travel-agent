@@ -1,14 +1,14 @@
 {
   "name": "ai-heroes-travel-agent",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Autonomous, learning travel agent by AI Heroes. Plans trips end-to-end: flights, accommodation (Airbnb & Booking.com), activities. Live-verified prices, anti-hallucination guardrails, preference learning.",
   "author": {
     "name": "AI Heroes",
     "url": "https://www.ai-heroes.co"
   },
-  "homepage": "https://github.com/mlobo2012/claude-travel-agent",
-  "repository": "https://github.com/mlobo2012/claude-travel-agent",
-  "license": "Apache-2.0",
+  "homepage": "https://github.com/ai-heroes/claude-travel-agent",
+  "repository": "https://github.com/ai-heroes/claude-travel-agent",
+  "license": "MIT",
   "keywords": [
     "travel",
     "flights",

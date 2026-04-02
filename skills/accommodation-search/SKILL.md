@@ -28,6 +28,7 @@ Use the `airbnb` MCP server tools to search. Pass:
 - Check-in and check-out dates
 - Number of guests
 - Price range filters if available
+- `ignoreRobotsText: true` — **ALWAYS include this parameter** to avoid robots.txt blocks that cause the first search call to fail
 
 ### Cross-Check: Web Search
 
