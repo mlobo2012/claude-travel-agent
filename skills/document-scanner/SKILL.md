@@ -66,7 +66,7 @@ Use Claude's vision to read the boarding pass. Boarding passes use a mix of prin
 
 #### Step 2: Match to Existing Trip
 
-1. Recall `travel_past_trips` from persistent memory
+1. Use the **Read tool** on `${CLAUDE_PLUGIN_DATA}/booked-trips.json` (or check Claude's memory as fallback)
 2. Match by flight number + date (exact match)
 3. If no exact match, try matching by route + date (within +/- 1 day tolerance)
 4. If no match found, create a new trip entry with status `in_progress`
@@ -168,7 +168,7 @@ Determine the currency from these signals (in priority order):
 3. Country of vendor (from address, language, or known chain location)
 4. Active trip destination currency
 
-If the receipt currency differs from the user's home currency (load the profile using the persistent-memory fallback chain: try `${CLAUDE_PLUGIN_DATA}/travel-profile.json` first, then Claude's memory), add a conversion note using approximate current rates:
+If the receipt currency differs from the user's home currency (use the **Read tool** on `${CLAUDE_PLUGIN_DATA}/travel-profile.json` to check; follow the persistent-memory fallback chain: file first, then Claude's memory, then ask the user), add a conversion note using approximate current rates:
 
 ```
 Note: €87.50 is approximately £74.80 at today's rate (€1 = £0.855).
@@ -200,7 +200,7 @@ Read the receipt image. Extract all visible fields into structured data. If the 
 
 #### Step 2: Associate with Trip
 
-1. Recall `travel_past_trips` from persistent memory
+1. Use the **Read tool** on `${CLAUDE_PLUGIN_DATA}/booked-trips.json` (or check Claude's memory as fallback)
 2. Match by date — find a trip whose date range covers the receipt date
 3. If the user is currently on a trip, default to that trip
 4. If multiple trips could match, ask: "Is this from your Barcelona trip (15-20 May) or your London trip (22-25 May)?"
@@ -349,12 +349,12 @@ Use Claude's vision to read the confirmation screenshot or photo. Detect the pla
 
 #### Step 2: Match or Create Trip
 
-1. Recall `travel_past_trips` from persistent memory
+1. Use the **Read tool** on `${CLAUDE_PLUGIN_DATA}/booked-trips.json` (or check Claude's memory as fallback)
 2. Match by destination + dates (within +/- 1 day tolerance)
 3. If match found: update the trip with booking details
 4. If no match: create a new trip entry with status `booked`
 
-#### Step 3: Save to Persistent Memory
+#### Step 3: Save Booking Data (Dual Write)
 
 Update `travel_past_trips` with the full booking data, using the same schema as the booking-detection skill.
 
@@ -589,7 +589,7 @@ Triggered by `/travel-expenses [trip-name]` or "generate expense report for [tri
 
 ### Report Generation Steps
 
-1. Recall `travel_past_trips` from persistent memory to resolve the trip name
+1. Use the **Read tool** on `${CLAUDE_PLUGIN_DATA}/booked-trips.json` (or check Claude's memory as fallback) to resolve the trip name
 2. Use the **Read tool** to load all expenses for that trip from `${CLAUDE_PLUGIN_DATA}/expense-log.json`
 3. Group by category
 4. Calculate totals, averages, and budget comparison

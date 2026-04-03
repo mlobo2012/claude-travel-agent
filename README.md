@@ -1,8 +1,32 @@
-# AI Heroes Travel Agent v2.2
+# AI Heroes Travel Agent v2.3
 
 A full multi-agent travel system plugin for **Claude Code** and **Claude Cowork** with **deep intelligence features**. Plans trips end-to-end with proactive transport mode selection, reasoning transparency on every recommendation, loyalty programme intelligence, post-booking price re-shopping, document scanning, expense tracking, parallel agent search, persistent memory learning, price monitoring, pre-trip reminders, trip packs, Gmail booking detection, and Google Calendar integration. All prices are live-verified with anti-hallucination guardrails.
 
 Built by [AI Heroes](https://www.ai-heroes.co).
+
+## What's New in v2.3
+
+### Cross-Session Persistence Fix
+Travel profiles now reliably persist across sessions in both Claude Code and Cowork using a **dual-persistence** strategy:
+- **File-based storage** (`${CLAUDE_PLUGIN_DATA}/travel-profile.json`) — works in Claude Code where the plugin data directory is persistent
+- **Claude's memory system** — works in Cowork where the plugin data directory is session-scoped
+- **Fallback chain**: file → Claude's memory → ask user. Profile is never lost.
+- All skills now use explicit Read/Write tool instructions to ensure files are actually saved
+
+### Deep Booking Links
+All search results now include deep links that take you directly to the specific flight/train/ferry/hotel with dates, passengers, and route pre-filled:
+- **Flights**: Ryanair, easyJet, BA, Wizz Air, Vueling, Lufthansa, KLM (with loyalty number where supported)
+- **Trains**: Eurostar, Trainline, Deutsche Bahn, SNCF, Omio, Amtrak
+- **Ferries**: Ferryhopper, Direct Ferries, DFDS, Stena Line, P&O, Brittany Ferries, Blue Star, Viking Line
+- **Hotels**: Airbnb (dates + guests), Booking.com, Marriott (with Bonvoy number), Hilton, IHG, Accor
+- Links show "Book this flight" / "Book this train" — not generic search pages
+
+### Enhanced Onboarding
+New fields captured during `/travel-setup`:
+- **Seat preference**: window, aisle, extra legroom, no preference, or minimize cost
+- **Personal details**: full name (as on passport/ID), email, phone — for pre-filling booking forms
+- **Passport number** (optional) — for international bookings
+- Loyalty membership numbers are now included in booking URLs where platforms support it
 
 ## What's New in v2.2
 

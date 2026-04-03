@@ -16,9 +16,9 @@ Generate a comprehensive, branded pre-departure document compiling all trip info
 ## Data Sources
 
 Compile data from:
-1. **Persistent memory** — `travel_past_trips` for trip details, booking references, dates
-2. **Persistent memory** — `travel_profile` for passport, home airport, preferences
-3. **Persistent memory** — `travel_packing_preferences` for personal packing must-haves
+1. Use the **Read tool** on `${CLAUDE_PLUGIN_DATA}/travel_past_trips.json` for trip details, booking references, dates (fall back to Claude's memory for `travel_past_trips` if file not found)
+2. Use the **Read tool** on `${CLAUDE_PLUGIN_DATA}/travel_profile.json` for passport, home airport, preferences (fall back to Claude's memory for `travel_profile` if file not found)
+3. Use the **Read tool** on `${CLAUDE_PLUGIN_DATA}/travel_packing_preferences.json` for personal packing must-haves (fall back to Claude's memory for `travel_packing_preferences` if file not found)
 4. **Web search** — current weather forecast for destination during travel dates
 5. **Web search** — practical info (currency exchange rates, emergency numbers, local transport)
 
@@ -150,13 +150,13 @@ When a trip is confirmed as "booked":
 
 1. Calculate T-2 date (2 days before departure)
 2. Create a scheduled task for 9:00 AM on T-2
-3. Task prompt: "Generate and send the trip pack for the user's [destination] trip on [dates]. Recall all trip data from persistent memory. Use web search for current weather forecast and practical info. Format using the trip pack template. Send via Dispatch."
+3. Task prompt: "Generate and send the trip pack for the user's [destination] trip on [dates]. Use the **Read tool** on `${CLAUDE_PLUGIN_DATA}/travel_past_trips.json`, `${CLAUDE_PLUGIN_DATA}/travel_profile.json`, and `${CLAUDE_PLUGIN_DATA}/travel_packing_preferences.json` to load trip data (fall back to Claude's memory if files not found). Use web search for current weather forecast and practical info. Format using the trip pack template. Send via Dispatch."
 
 ## On-Demand Generation
 
 When the user requests a trip pack:
 
-1. Check persistent memory for trips
+1. Use the **Read tool** on `${CLAUDE_PLUGIN_DATA}/travel_past_trips.json` to check for trips (fall back to Claude's memory for `travel_past_trips` if file not found)
 2. If multiple upcoming trips, ask which one
 3. If one upcoming trip, generate for that
 4. If no upcoming trips, say "No upcoming trips found. Plan a trip first with /plan-trip."

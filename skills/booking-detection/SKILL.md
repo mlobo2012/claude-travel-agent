@@ -1,6 +1,6 @@
 ---
 name: booking-detection
-description: "Detect and parse booking confirmation emails from Gmail. Extracts booking references, dates, flight numbers, and accommodation details. Logs bookings to persistent memory and confirms via Dispatch. Use when: Gmail connector is enabled and booking emails are detected."
+description: "Detect and parse booking confirmation emails from Gmail. Extracts booking references, dates, flight numbers, and accommodation details. Logs bookings to file and Claude's memory, and confirms via Dispatch. Use when: Gmail connector is enabled and booking emails are detected."
 user-invocable: false
 ---
 
@@ -72,14 +72,16 @@ After extracting booking details:
 
 ### Step 1: Match to Existing Trip
 
-1. Recall `travel_past_trips` from persistent memory
+1. Use the **Read tool** on `${CLAUDE_PLUGIN_DATA}/travel_past_trips.json` to load existing trips. If the file doesn't exist, fall back to Claude's memory for `travel_past_trips`.
 2. Check if the booking dates match any existing trip (within +/- 1 day tolerance)
 3. If match found → update that trip with the booking details
 4. If no match → create a new trip entry
 
-### Step 2: Save to Persistent Memory
+### Step 2: Save Trip Data (Dual Persistence)
 
-Update the matched or new trip in `travel_past_trips`:
+Use the **Write tool** to save the updated trip data to `${CLAUDE_PLUGIN_DATA}/travel_past_trips.json` AND save it to Claude's memory as `travel_past_trips`.
+
+Update the matched or new trip:
 
 ```json
 {
@@ -152,5 +154,5 @@ I'll send you reminders before departure. Your trip pack will be ready 2 days be
 
 - Gmail access is **read-only** — this skill never sends, deletes, or modifies emails
 - Only booking confirmation emails are read — personal emails are never accessed
-- Extracted data is stored only in persistent memory and the local plugin data directory
+- Extracted data is stored in `${CLAUDE_PLUGIN_DATA}/` via the Write tool and in Claude's memory
 - No email content is sent to third parties

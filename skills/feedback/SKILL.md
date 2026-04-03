@@ -32,7 +32,7 @@ After collecting feedback:
 
 ### 1. Save to Feedback History
 
-Load the profile using the persistent-memory fallback chain (file -> memory -> quick setup), then append to `feedback_history`:
+Use the **Read tool** on `${CLAUDE_PLUGIN_DATA}/travel-profile.json` to load the profile (follow the persistent-memory fallback chain: file first, then Claude's memory, then ask the user). Append the feedback entry to `feedback_history`, then use the **Write tool** to save the updated profile:
 
 ```json
 {

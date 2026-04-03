@@ -73,6 +73,27 @@ Book direct with the operator for best availability, especially in peak season.
 [If applicable: "Only [source] was available for pricing — not cross-checked."]
 ```
 
+## Deep Booking Links
+
+**ALWAYS generate deep links that take the user to the specific route search, not a generic homepage.** Construct deep booking links with route, dates, and passenger count pre-filled where possible.
+
+For known ferry platforms and operators, construct deep links:
+
+- **Ferryhopper:** `[Book this ferry on Ferryhopper](https://www.ferryhopper.com/en/ferry-routes/ORIGIN-DESTINATION?departureDate=YYYY-MM-DD&passengers=N)`
+- **Direct Ferries:** `[Book this ferry on Direct Ferries](https://www.directferries.com/routes/ORIGIN_DESTINATION.htm?departureDate=YYYY-MM-DD&adults=N)`
+- **DFDS:** `[Book this ferry](https://www.dfds.com/en/passenger-ferries/ORIGIN-DESTINATION?outbound=YYYY-MM-DD&adults=N)`
+- **Stena Line:** `[Book this ferry](https://www.stenaline.co.uk/routes/ORIGIN-DESTINATION?date=YYYY-MM-DD&adults=N)`
+- **P&O Ferries:** `[Book this ferry](https://www.poferries.com/en/routes/ORIGIN-DESTINATION?departureDate=YYYY-MM-DD&adults=N)`
+- **Brittany Ferries:** `[Book this ferry](https://www.brittany-ferries.co.uk/ferry-routes/ORIGIN-DESTINATION?departureDate=YYYY-MM-DD&adults=N)`
+- **Blue Star Ferries:** `[Book this ferry](https://www.bluestarferries.com/en/booking?from=ORIGIN&to=DESTINATION&date=YYYY-MM-DD&passengers=N)`
+- **Viking Line:** `[Book this ferry](https://www.vikingline.com/find-a-cruise-or-ferry/?route=ORIGIN-DESTINATION&date=YYYY-MM-DD&adults=N)`
+- **Jadrolinija:** `[Book this ferry](https://www.jadrolinija.hr/en/ferry-croatia?from=ORIGIN&to=DESTINATION&date=YYYY-MM-DD&adults=N)`
+- **For other operators / fallback:** `[Book on Ferryhopper](https://www.ferryhopper.com/en/ferry-routes/ORIGIN-DESTINATION)` or `[Book on Direct Ferries](https://www.directferries.com/routes/ORIGIN_DESTINATION.htm)`
+
+**Format ALL booking links as proper markdown.** Show "Book this ferry" not "Search on Ferryhopper".
+
+**Operator direct vs aggregator:** When an operator's direct booking link is available, prefer it. Use Ferryhopper or Direct Ferries as a fallback or for price comparison. If showing both, label clearly: "Book direct" vs "Compare on Ferryhopper".
+
 ## Overnight Ferry Handling
 
 For routes over 6 hours, overnight ferries combine transport and accommodation:

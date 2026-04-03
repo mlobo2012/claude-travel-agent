@@ -77,9 +77,9 @@ Record the current state of the item being watched:
 }
 ```
 
-### Step 2: Save to Persistent Memory
+### Step 2: Save Watch Item (Dual Persistence)
 
-Save the watch item to `travel_watched_items` in persistent memory.
+Use the **Write tool** to save the watch item to `${CLAUDE_PLUGIN_DATA}/travel_watched_items.json` AND save it to Claude's memory as `travel_watched_items`.
 
 ### Step 3: Create Scheduled Task
 
@@ -87,7 +87,7 @@ Create a scheduled task that runs **twice daily** — at 8:00 AM and 6:00 PM in 
 
 Use Cowork's scheduled task system:
 - Create a task with a cron expression: `0 8,18 * * *`
-- Task prompt: "Run price check for watched travel items. Recall `travel_watched_items` from persistent memory. For each active item, re-query the MCP tools with the saved search_params. Compare the current price to the baseline_price. Report any significant changes via Dispatch."
+- Task prompt: "Run price check for watched travel items. Use the **Read tool** on `${CLAUDE_PLUGIN_DATA}/travel_watched_items.json` to load watched items (fall back to Claude's memory for `travel_watched_items` if file not found). For each active item, re-query the MCP tools with the saved search_params. Compare the current price to the baseline_price. Report any significant changes via Dispatch."
 
 ### Step 4: Confirm to User
 
@@ -105,12 +105,12 @@ Say "what are you watching?" to see all active watches.
 
 When the scheduled task fires:
 
-1. Recall `travel_watched_items` from persistent memory
+1. Use the **Read tool** on `${CLAUDE_PLUGIN_DATA}/travel_watched_items.json` to load watched items. If the file doesn't exist, fall back to Claude's memory for `travel_watched_items`.
 2. For each item with `status: "active"`:
    a. Re-query the same MCP tool with the saved `search_params`
    b. Record the current price
    c. Compare to baseline price
-   d. Update `last_checked` and `last_price` in memory
+   d. Use the **Write tool** to update `last_checked` and `last_price` in `${CLAUDE_PLUGIN_DATA}/travel_watched_items.json` AND update Claude's memory
 
 ### Alert Thresholds
 
@@ -168,9 +168,9 @@ Reply "stop watching" to cancel this alert.
 
 When the user says "stop watching", "cancel price watch", "stop monitoring":
 
-1. Recall `travel_watched_items` from persistent memory
+1. Use the **Read tool** on `${CLAUDE_PLUGIN_DATA}/travel_watched_items.json` to load watched items. If the file doesn't exist, fall back to Claude's memory for `travel_watched_items`.
 2. If multiple items are being watched, ask which one to cancel
-3. Set `status: "cancelled"` on the selected item
+3. Set `status: "cancelled"` on the selected item and use the **Write tool** to save the updated list to `${CLAUDE_PLUGIN_DATA}/travel_watched_items.json` AND update Claude's memory
 4. Delete the associated scheduled task
 5. Confirm: "Stopped watching [item]. You have [N] remaining active watches."
 

@@ -144,7 +144,7 @@ When a trip is fully booked (flights + accommodation):
 ## Manual Trigger
 
 When the user says "add to my calendar":
-1. Check what trip data is available in persistent memory
+1. Use the **Read tool** on `${CLAUDE_PLUGIN_DATA}/travel_past_trips.json` to load trip data. If the file doesn't exist, fall back to Claude's memory for trip details.
 2. If no calendar connector, explain: "I need Google Calendar access to create events. You can enable the Google Calendar connector in your Cowork settings."
 3. If connector available, create all applicable events
 4. List what was created

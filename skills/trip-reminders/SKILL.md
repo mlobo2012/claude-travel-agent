@@ -10,7 +10,7 @@ Automatically create scheduled reminder tasks relative to the user's departure d
 
 ## When to Create Reminders
 
-- When a trip is confirmed as "booked" in persistent memory
+- When a trip is confirmed as "booked" (in `${CLAUDE_PLUGIN_DATA}/travel_past_trips.json` or Claude's memory)
 - When the user says "remind me before my trip" or "set up trip reminders"
 - When a booking is detected via Gmail (booking-detection skill)
 
@@ -22,7 +22,7 @@ Automatically create scheduled reminder tasks relative to the user's departure d
 
 Create a scheduled task for 9:00 AM, 7 days before departure.
 
-Prompt: "Send the user a 1-week pre-trip reminder. Recall the trip details from `travel_past_trips` in persistent memory for [destination]. Include: trip dates, what's booked vs still needed (flights, accommodation), any action items. Use web search to get the current weather forecast for [destination] for the travel dates. Send via Dispatch."
+Prompt: "Send the user a 1-week pre-trip reminder. Use the **Read tool** on `${CLAUDE_PLUGIN_DATA}/travel_past_trips.json` to load trip details for [destination] (fall back to Claude's memory for `travel_past_trips` if file not found). Include: trip dates, what's booked vs still needed (flights, accommodation), any action items. Use web search to get the current weather forecast for [destination] for the travel dates. Send via Dispatch."
 
 Template:
 ```
@@ -43,7 +43,7 @@ Anything still to sort? Just ask!
 
 Create a scheduled task for 8:00 AM, 1 day before departure.
 
-Prompt: "Send the user a departure-eve reminder. Include flight details, weather at destination, and packing reminders based on destination and weather. Recall trip details and packing preferences from persistent memory. Send via Dispatch."
+Prompt: "Send the user a departure-eve reminder. Include flight details, weather at destination, and packing reminders based on destination and weather. Use the **Read tool** on `${CLAUDE_PLUGIN_DATA}/travel_past_trips.json` and `${CLAUDE_PLUGIN_DATA}/travel_packing_preferences.json` to load trip details and packing preferences (fall back to Claude's memory if files not found). Send via Dispatch."
 
 Template:
 ```
@@ -109,14 +109,14 @@ Anything you still need to arrange?
 
 All reminders must include:
 1. **Current weather forecast** for the destination (use web search at the time the reminder fires)
-2. **Flight details** if booked (from persistent memory trip data)
-3. **Accommodation details** if booked (from persistent memory trip data)
+2. **Flight details** if booked (from `${CLAUDE_PLUGIN_DATA}/travel_past_trips.json` via the Read tool, or Claude's memory)
+3. **Accommodation details** if booked (from `${CLAUDE_PLUGIN_DATA}/travel_past_trips.json` via the Read tool, or Claude's memory)
 4. **Packing suggestions** appropriate to weather and destination
 5. **Destination-specific items** (travel adaptor type, visa notes, currency tips)
 
 ## Packing Intelligence
 
-Check persistent memory for `travel_packing_preferences`. If the user has saved packing preferences, include their must-haves. If not, use sensible defaults based on:
+Use the **Read tool** on `${CLAUDE_PLUGIN_DATA}/travel_packing_preferences.json` to load packing preferences (fall back to Claude's memory for `travel_packing_preferences` if file not found). If the user has saved packing preferences, include their must-haves. If not, use sensible defaults based on:
 
 - **Beach destination:** sunscreen, swimwear, hat, sunglasses
 - **City break:** comfortable walking shoes, umbrella, day bag
@@ -130,12 +130,12 @@ When setting up reminders for a trip:
 
 1. Calculate the reminder dates based on departure date and trip length
 2. Create one scheduled task per reminder, each with the appropriate cron expression for a single fire
-3. Save the task IDs to persistent memory alongside the trip data
+3. Use the **Write tool** to save the task IDs to `${CLAUDE_PLUGIN_DATA}/travel_past_trips.json` alongside the trip data AND save to Claude's memory
 4. Confirm to the user: "I've set up [N] reminders for your [destination] trip. You'll get alerts at [list dates/times]."
 
 ## Cancellation
 
 If a trip is cancelled:
 1. Delete all associated reminder scheduled tasks
-2. Update the trip status in persistent memory to "cancelled"
+2. Use the **Write tool** to update the trip status to "cancelled" in `${CLAUDE_PLUGIN_DATA}/travel_past_trips.json` AND update Claude's memory
 3. Confirm: "Cancelled all reminders for your [destination] trip."

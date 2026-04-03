@@ -65,7 +65,7 @@ Apply these filters in order:
 - Flights: prefer direct flights if within 20% price of connections
 
 ### 3b. Preference Scoring
-Load the user's profile using the persistent-memory fallback chain (try `${CLAUDE_PLUGIN_DATA}/travel-profile.json` first, then Claude's memory) and score:
+Use the **Read tool** on `${CLAUDE_PLUGIN_DATA}/travel-profile.json` to load the user's profile (follow the persistent-memory fallback chain: file first, then Claude's memory, then ask the user) and score:
 
 ```
 Base score = listing quality (reviews, completeness)
