@@ -61,17 +61,44 @@ For top Google Flights results:
 - Cross-check via web search on Skyscanner or airline direct websites
 - Compare prices — flag discrepancies >5%
 
-### Fallback and Coverage Gap Detection
+### Always Cross-Check MCP Results
 
-Fall back to web search in ANY of these situations:
+The Google Flights MCP is a starting point, not the complete picture. It has coverage gaps across every region: missing budget carriers, incomplete secondary airport coverage, and inconsistent availability for some airline families. This is not specific to one market.
 
-1. **MCP error or not connected:** Use web search on Google Flights, Skyscanner, or airline websites directly.
-2. **No direct flights returned:** If the user asked for direct flights and the MCP only returns connecting options, search the web for budget carriers (Ryanair, easyJet, Wizz Air, Vueling, Norwegian) that likely serve the route but are missing from MCP results.
-3. **Only expensive options returned:** If the cheapest MCP result is more than 2x the typical budget fare for that route length in Europe (roughly >£300 per person for a 2-3h flight), run a web search to check for low-cost carriers the MCP may have missed.
-4. **Known MCP blind spots:** Google Flights MCP has incomplete coverage of some budget carriers, especially Ryanair from secondary airports (Stansted, Luton, Beauvais, Ciampino, Charleroi). For any European route, ALWAYS run a supplementary web search for Ryanair and easyJet even if the MCP returned results, then merge any cheaper or more convenient options into the final recommendations.
-5. **Missing obvious carriers:** If the route obviously should include a major carrier (e.g., BA for London-Rome, Iberia for London-Madrid) but that airline is absent from MCP results, search for it specifically.
+**After every MCP search, always run a supplementary web search.** This is not a fallback for errors. It is a mandatory second step.
 
-When presenting web-search results alongside MCP results, note the source: "MCP-verified" vs "web search." Prefer MCP-verified prices when both exist for the same flight, but never suppress a cheaper web-search finding just because the MCP didn't return it.
+#### Why
+
+No single flight data source covers every airline. Examples of what MCP may miss:
+- Budget carriers operating from secondary airports (Ryanair from Stansted, Spirit from Fort Lauderdale, Jetstar from Avalon, Cebu Pacific from Clark)
+- Regional carriers with limited GDS presence (Sun Country, Breeze, Bonza, Flybondi, IndiGo on international routes)
+- Charter or seasonal routes that only appear on the operator's own site
+- Codeshare-only fares where the operating carrier is not indexed
+- Recently launched routes that haven't propagated to aggregators yet
+
+This applies to every region: Europe, North America, Asia-Pacific, Latin America, Middle East, Africa.
+
+#### How
+
+1. Run the MCP search first to get structured, verified results.
+2. Then run a web search on Skyscanner or Google Flights for the same route and dates.
+3. Compare the two result sets. Look for:
+   - airlines present in web results but absent from MCP
+   - materially cheaper options the MCP missed
+   - direct flights the MCP didn't surface
+   - secondary airports the MCP didn't search
+4. Merge the best options from both sources into the final recommendations.
+5. Label each result's source: "MCP-verified" or "web search" so the user knows the confidence level.
+
+#### Specific triggers that make the cross-check even more important
+
+- MCP returned **no direct flights** but the user asked for direct
+- MCP returned **only expensive options** for a route where budget carriers typically operate
+- MCP returned **fewer than 3 distinct airlines** for a major route
+- The route involves a **secondary or budget-focused airport** (STN, LTN, BVA, CIA, CRL, SFB, PIE, AVV, etc.)
+- The user mentioned a **specific airline** that doesn't appear in MCP results
+
+Never present MCP results alone as the complete answer. The cross-check is what turns this from a single-source lookup into genuine travel agent intelligence.
 
 ## Output Template
 
