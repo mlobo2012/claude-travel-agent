@@ -18,10 +18,10 @@ This explicit onboarding flow should ONLY run when:
 
 ## Before Starting
 
-Check if a profile already exists using the persistent-memory fallback chain:
-1. Try reading `${CLAUDE_PLUGIN_DATA}/travel-profile.json`
-2. If not found, check Claude's auto-memory for travel profile facts (look for `travel_profile.md` or `travel-profile` in MEMORY.md)
-3. If not found, scan Claude's existing memories for any travel-relevant facts from other conversations
+Check if a profile already exists using the persistence fallback chain:
+1. **Primary store:** Try reading `${CLAUDE_PLUGIN_DATA}/travel-profile.json`
+2. **Backup store:** If not found, check Claude's memory for travel profile facts (look for `travel_profile.md` or `travel-profile` in MEMORY.md)
+3. **Scattered facts:** If not found, scan Claude's existing memories for any travel-relevant facts from other conversations
 
 If a profile exists, show the user what you already have and ask if they want to update it, fill in gaps, or start fresh.
 
@@ -123,9 +123,9 @@ After onboarding, remind the user: "You can manage your loyalty programmes anyti
 
 ## After All Questions
 
-Build the complete profile JSON and save it using the **dual-persistence** approach:
+Build the complete profile JSON and save it using the **dual-persistence** approach (primary file store + Claude memory backup):
 
-### Step 1: Write the file
+### Step 1: Write the primary file store
 
 Save to `${CLAUDE_PLUGIN_DATA}/travel-profile.json`:
 
@@ -201,9 +201,11 @@ Save to `${CLAUDE_PLUGIN_DATA}/travel-profile.json`:
 
 Only populate the fields the user actually answered. Leave others as sensible defaults.
 
-### Step 2: Save to Claude's auto-memory system
+### Step 2: Push to Claude's memory (best-effort backup)
 
-Immediately after writing the file, you MUST also save the profile to Claude's persistent auto-memory. This is CRITICAL for cross-session persistence — especially in Cowork where the plugin data file may not survive.
+Immediately after writing the file, you MUST also push the profile to Claude's memory system as a best-effort backup. This enables cross-session persistence when the primary file store is unavailable — especially in Cowork where the plugin data directory is ephemeral, or when the user starts a new project in Claude Code.
+
+**Note:** Claude memory is a backup, not a guarantee. It may not always persist across projects or environments. The primary file store is always the authoritative source when available.
 
 **In Claude Code:** Use the **Write tool** to create/overwrite a file named `travel_profile.md` in your project memory directory (the same directory where `MEMORY.md` lives). Use this format:
 

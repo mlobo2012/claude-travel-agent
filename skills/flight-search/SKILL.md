@@ -8,6 +8,17 @@ argument-hint: "<origin> to <destination> [dates] [preferences]"
 
 Search for flights using live MCP data with full quality verification.
 
+## CRITICAL: Booking Link Rules
+
+**Every flight option MUST include a deep booking link with route, dates, and passengers pre-filled.** Never link to a generic airline homepage or search page. See the `booking-links` skill for the canonical URL templates.
+
+- Use airline direct deep links (Ryanair, easyJet, BA, Wizz, Vueling, Lufthansa, KLM, etc.) as first priority
+- Fall back to Google Flights deep link with route + dates if no airline template exists
+- Link text MUST name the specific option: `[Book Ryanair FR1234 STN→CTA 14 May](URL)` — NOT `[Search on Google Flights](URL)`
+- Include child parameters in every URL when children are travelling
+- Include loyalty membership numbers where the URL supports it
+- If the user has a loyalty programme for the airline or its alliance, mention it and include the number
+
 ## Before Searching
 
 1. **Load the user's travel profile** using the persistent-memory fallback chain:
@@ -86,7 +97,7 @@ Verify current prices and availability before booking.
 
 ## Deep Booking Links
 
-**ALWAYS generate deep links that take the user to the specific flight, not a generic homepage.** The Google Flights MCP returns a `booking_token`, NOT a booking URL. Construct deep booking links manually.
+**ALWAYS generate deep links that take the user to the specific flight, not a generic homepage.** The Google Flights MCP returns a `booking_token`, NOT a booking URL. Construct deep booking links manually using the templates in the `booking-links` skill (the canonical reference for all URL templates).
 
 For known airlines, construct deep links with dates, route, and passenger count pre-filled:
 

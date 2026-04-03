@@ -10,13 +10,13 @@ Manage the persistent travel preference profile using the dual-persistence appro
 
 ## Loading the Profile
 
-**Always use the persistent-memory fallback chain:**
+**Always use the persistence fallback chain:**
 
-1. **First:** Try reading `${CLAUDE_PLUGIN_DATA}/travel-profile.json` with the Read tool
-2. **Fallback:** If the file doesn't exist or is empty, check Claude's own memory for travel profile facts
+1. **Primary store:** Try reading `${CLAUDE_PLUGIN_DATA}/travel-profile.json` with the Read tool — this is the authoritative source
+2. **Backup store:** If the file doesn't exist or is empty, check Claude's memory for travel profile facts — this is best-effort
 3. **If neither exists:** Tell the user "No travel profile found. Run /travel-setup to create one."
 
-If memory has data but the file doesn't, reconstruct the JSON from memory and re-save it to the file.
+If Claude's memory has data but the primary file doesn't, reconstruct the JSON from memory and re-save it to the primary file store.
 
 ## Commands
 
@@ -70,7 +70,7 @@ If the user runs `/travel-profile update` or says they want to change a preferen
 1. Load the current profile using the fallback chain
 2. Ask what they want to change
 3. Update only the specified fields
-4. **Save using dual-persistence:** write to `${CLAUDE_PLUGIN_DATA}/travel-profile.json` AND update Claude's memory
+4. **Save using dual-persistence:** write to the primary file store (`${CLAUDE_PLUGIN_DATA}/travel-profile.json`) AND push to Claude's memory (backup)
 5. Confirm the change
 
 ### Trip History
@@ -144,6 +144,12 @@ If the user runs `/travel-profile history`:
 }
 ```
 
+## Persistence Model
+
+- **Primary store:** `${CLAUDE_PLUGIN_DATA}/travel-profile.json` — authoritative, persists within the same project
+- **Backup store:** Claude's memory system — best-effort, may persist across projects/environments but is not guaranteed
+- Always save to both. Always try both when loading. The primary store wins when both exist.
+
 ## Auto-Read Before Search
 
-**Important:** The travel-agent core skill requires reading the profile before every search. Always use the persistent-memory fallback chain (file -> memory -> quick setup). Never read only one source.
+**Important:** The travel-agent core skill requires reading the profile before every search. Always use the persistence fallback chain (primary file → Claude memory backup → quick setup). Never read only one source.

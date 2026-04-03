@@ -1,502 +1,244 @@
-# AI Heroes Travel Agent v2.3
+# AI Heroes Travel Agent
 
-A full multi-agent travel system plugin for **Claude Code** and **Claude Cowork** with **deep intelligence features**. Plans trips end-to-end with proactive transport mode selection, reasoning transparency on every recommendation, loyalty programme intelligence, post-booking price re-shopping, document scanning, expense tracking, parallel agent search, persistent memory learning, price monitoring, pre-trip reminders, trip packs, Gmail booking detection, and Google Calendar integration. All prices are live-verified with anti-hallucination guardrails.
+An intelligent travel plugin for **Claude Code** and **Claude Cowork** that plans trips end-to-end — flights, trains, ferries, accommodation, and activities — with live-verified prices, proactive transport recommendations, loyalty programme intelligence, and reasoning transparency on every suggestion. It learns your preferences over time and applies them to every search.
 
 Built by [AI Heroes](https://www.ai-heroes.co).
 
-## What's New in v2.3
+---
 
-### Cross-Session Persistence Fix
-Travel profiles now reliably persist across sessions in both Claude Code and Cowork using a **dual-persistence** strategy:
-- **File-based storage** (`${CLAUDE_PLUGIN_DATA}/travel-profile.json`) — works in Claude Code where the plugin data directory is persistent
-- **Claude's memory system** — works in Cowork where the plugin data directory is session-scoped
-- **Fallback chain**: file → Claude's memory → ask user. Profile is never lost.
-- All skills now use explicit Read/Write tool instructions to ensure files are actually saved
+## Key Features
 
-### Deep Booking Links
-All search results now include deep links that take you directly to the specific flight/train/ferry/hotel with dates, passengers, and route pre-filled:
-- **Flights**: Ryanair, easyJet, BA, Wizz Air, Vueling, Lufthansa, KLM (with loyalty number where supported)
-- **Trains**: Eurostar, Trainline, Deutsche Bahn, SNCF, Omio, Amtrak
-- **Ferries**: Ferryhopper, Direct Ferries, DFDS, Stena Line, P&O, Brittany Ferries, Blue Star, Viking Line
-- **Hotels**: Airbnb (dates + guests), Booking.com, Marriott (with Bonvoy number), Hilton, IHG, Accor
-- Links show "Book this flight" / "Book this train" — not generic search pages
-
-### Enhanced Onboarding
-New fields captured during `/travel-setup`:
-- **Seat preference**: window, aisle, extra legroom, no preference, or minimize cost
-- **Personal details**: full name (as on passport/ID), email, phone — for pre-filling booking forms
-- **Passport number** (optional) — for international bookings
-- Loyalty membership numbers are now included in booking URLs where platforms support it
-
-## What's New in v2.2
-
-### Post-Booking Price Re-Shopping
-After you book a flight or hotel, the plugin automatically monitors the price. If it drops significantly, you get a proactive alert with:
-- Original price vs new price, with exact savings amount
-- Cancellation fee (if known) and **net savings** after the fee
-- Direct rebooking link for the new price
-- Recommended action (rebook, hold, or wait for further drops)
-- Loyalty implications if rebooking on a different carrier ("Rebooking on Ryanair saves £80 but you lose 4,500 Avios from the BA booking")
-- **Price trend analysis** — tracks price history over time and surfaces patterns: "This route typically drops 15% 3 weeks before departure based on your booking history"
-
-Configurable alert thresholds (default: >10% drop or >£50 savings, whichever triggers first).
-
-### Reasoning Transparency — "Why This?"
-Every single recommendation now includes a visible **Why this?** block that traces the reasoning:
-- Which profile preferences influenced the choice
-- Which past trip feedback was applied ("You rated the Marriott 5/5 last time in NYC")
-- Which trip context signals were detected ("Travelling with 2 kids under 5 → family-friendly filter applied")
-- Which transport intelligence rules fired ("Route under 3h by train + eco preference → Eurostar recommended over flight")
-- Price vs comfort vs speed tradeoff that was made
-- Loyalty earning opportunities factored in
-
-**Challenge any recommendation** — say "Why didn't you suggest X?" and the agent explains what filtered X out and offers to update your preferences. Over time, the agent learns which factors you actually care about vs which you say you care about, by tracking which recommendations you accept vs override.
-
-### Loyalty Programme Intelligence
-Full loyalty programme management across airlines, hotels, and rail:
-- **Auto-apply** — membership numbers are applied to every relevant search
-- **Tier tracking** — "You need 2 more BA flights before March to keep Gold status. This trip could count if you fly BA."
-- **Cross-programme optimisation** — "Marriott gives you a suite upgrade at your tier, Hilton is £30/night cheaper. Given your comfort preference, recommending Marriott."
-- **Earning opportunities** — flags when a slightly more expensive option earns significant points
-- **Alliance awareness** — knows oneworld, Star Alliance, SkyTeam partnerships
-- **Rail loyalty** — Eurostar Club Eurostar, Amtrak Guest Rewards, BahnCard, UK Railcards
-- **Proactive detection** — "I see you've flown BA 3 times. Do you have an Executive Club number?"
-
-Manage with `/loyalty-manager` (view, add, update, status).
-
-### Document Scanner & Expense Tracking
-Upload a photo of any travel document and the agent extracts everything:
-- **Boarding passes** — flight number, route, seat, gate, boarding time, frequent flyer number. Auto-updates trip record and loyalty tracker.
-- **Receipts** — vendor, amount, currency, category. Logged to expense tracker with running trip total and budget comparison.
-- **Booking confirmations** — all details extracted, trip record created, price reshop monitoring activated.
-- **Hotel bills** — itemised charges compared against booked rate. Flags overcharges: "Your hotel charged £189/night but your booking was £165/night."
-
-**Expense reports** with `/travel-expenses` — grouped by category, with totals, VAT breakdown, per-day option, and comparison to your historical spending patterns.
-
-**Predictive spending intelligence** — "Your last 3 European trips averaged £180/night. This booking is £220/night — want me to look for alternatives?"
-
-### Cross-Feature Intelligence
-All v2.2 features integrate deeply with each other and existing features:
-- Loyalty manager informs reasoning transparency ("BA flight is £80 more but earns 4,500 Avios and keeps your Gold status")
-- Price reshop factors in loyalty implications when suggesting rebooking on different carriers
-- Document scanner feeds the loyalty tracker (boarding pass → Avios balance update)
-- Expense patterns inform trip planning budgets ("Based on your last 5 trips, a 4-night European city break typically costs £1,800")
-- Reasoning transparency explains all of the above in every recommendation
-
-### Previously in v2.1
-
-- **Multi-modal transport** — Trains, ferries, and local transit alongside flights
-- **Proactive intelligence** — Automatically recommends the best transport mode based on your profile, not just flights by default
-- **Family-aware** — Knows that kids ride free on Deutsche Bahn, get 30% off Eurostar, and pay full fare on airlines
-- **Local transit** — Last-mile connections from stations/airports to your accommodation (TfL MCP for London, web search elsewhere)
-- **Embedded knowledge base** — 30+ train-competitive routes, child policies, scenic routes, and ferry connections
-
-### Previously in v2.0
-
-- **Persistent Memory** — Preferences, feedback, and trip history persist across all sessions via Cowork's built-in memory
-- **Parallel Agent Search** — 3 specialist agents (flights, accommodation, activities) search simultaneously for faster trip planning
-- **Price Monitoring** — Watch flights and accommodation prices twice daily; get alerts on drops >10% or rises >20%
-- **Pre-Trip Reminders** — Dynamic reminders at T-14, T-7, T-3, and T-1 days with weather forecasts and packing suggestions
-- **Trip Pack** — Branded pre-departure document with all trip details, itinerary, practical info, and packing checklist
-- **Gmail Booking Detection** — Auto-detect booking confirmation emails and log them to your trip (requires Gmail connector)
-- **Google Calendar Integration** — Auto-create calendar events for flights, accommodation, activities, and packing reminders (requires Google Calendar connector)
-- **Learning Engine** — Every search interaction and trip feedback refines future recommendations
+- **Proactive transport intelligence** — Recommends trains, flights, or ferries based on route analysis, your profile, and trip context. Doesn't default to flights.
+- **Deep booking links** — Every result links directly to the specific option with dates, passengers, and route pre-filled. Covers 15+ airlines, 8+ rail operators, 10+ ferry operators, and major hotel chains.
+- **Reasoning transparency** — Every recommendation includes a "Why this?" block explaining exactly which preferences, past trips, and loyalty factors influenced the choice.
+- **Loyalty programme tracking** — Auto-applies membership numbers, tracks tier progress, flags earning opportunities, and factors loyalty into every tradeoff.
+- **Live-verified prices** — All prices come from live MCP data or web search, timestamped and source-attributed. No rounding, no estimating, no fabricating.
+- **Family-aware** — Knows child fare policies across operators (free on Deutsche Bahn, 30% off Eurostar, full fare on airlines) and includes children in booking links.
+- **Parallel agent search** — Three specialist agents (flights, accommodation, activities) search simultaneously for faster trip planning.
+- **Post-booking price monitoring** — Watches booked items for price drops and alerts with net savings after cancellation fees and loyalty implications.
+- **Document scanning** — Upload boarding passes, receipts, and hotel bills for automatic extraction, expense tracking, and overcharge detection.
+- **Gmail + Calendar integration** — Detects booking confirmations in Gmail and creates calendar events with airport buffer times and packing reminders.
 
 ---
 
-## What It Does
+## Setup
 
-- **Proactive transport intelligence** — Analyses the route, your profile, and trip context to recommend trains, flights, or ferries before you ask
-- **Reasoning transparency** — Every recommendation explains WHY it was chosen, grounded in your profile, past trips, and context
-- **Loyalty programme intelligence** — Auto-applies loyalty programmes, tracks tier progress, flags earning opportunities, cross-programme optimisation
-- **Post-booking price reshop** — Monitors booked items for price drops, alerts with net savings after cancellation fees and loyalty implications
-- **Document scanning** — Upload boarding passes, receipts, booking confirmations, hotel bills for automatic extraction and tracking
-- **Expense tracking** — Running totals per trip, budget comparison, category breakdown, predictive spending patterns
-- **Flight search** via Google Flights MCP — live prices, direct booking links, multi-airport London search
-- **Train search** via Public Transport MCP — European and US rail routes, child fare policies
-- **Ferry search** via Ferryhopper MCP — European ferry routes, island hopping, overnight sailings
-- **Local transit** via TfL MCP (London) + web search — airport/station transfers, getting around
-- **Accommodation search** via Airbnb MCP — live prices, review scores, amenities, preference scoring
-- **Full trip planning** — transport + accommodation + local transit + day-by-day itinerary + practical info
-- **Anti-hallucination guardrails** — every price is live-verified, timestamped, and source-attributed. No rounding, estimating, or fabricating prices. Ever.
-- **Preference learning** — onboarding builds a profile that improves every search
-- **Post-trip feedback** — learns from your experiences to refine future recommendations
-- **Cross-checking** — prices verified across multiple sources when possible
-- **Family travel** — child fares, luggage policies, and family-friendly recommendations built in
+### Requirements
 
----
+- **Node.js 18+** with `npx` in your PATH (for MCP servers)
+- **Claude Code** or **Claude Cowork**
 
-## How the Deep Intelligence Works
+### Install
 
-### Reasoning Transparency
-
-Unlike other travel tools that just show results, this agent explains its thinking:
-
-| You see | What's happening |
-|---------|-----------------|
-| **Why this?** You prefer direct flights, have BA Executive Club Gold, and rated your last BA flight 5/5. This is BA direct with window seat available. | Profile preferences + past feedback + loyalty status → specific recommendation |
-| **Why this over Ryanair?** Ryanair is £80 cheaper, but you'd lose 4,500 Avios and your Gold status needs 2 more flights. Given your comfort preference, leading with BA. | Cross-feature: loyalty + transport preference + tier tracking → tradeoff explanation |
-| **Tradeoff:** Option A saves £40 but is 1h longer. Your profile says "budget priority" — showing A first. Want me to lead with speed instead? | Explicit tradeoff with offer to recalibrate |
-
-Say "Why didn't you suggest X?" to understand what was filtered and update your preferences if needed.
-
-### Post-Booking Price Intelligence
-
-After you book, the agent watches prices automatically:
-
-1. **Booking detected** (via manual confirmation, document scan, or Gmail)
-2. **Price monitoring activated** — checks twice daily
-3. **Price drop detected** → alert with original price, new price, cancellation fee, net savings
-4. **Trend analysis** → "Prices on this route have dropped 3 days in a row — they may stabilise soon"
-5. **Loyalty impact** → "Rebooking saves £120 but you lose your BA seat selection and 2,400 Avios"
-6. **Action recommended** → rebook now, wait for further drop, or hold current booking
-
-### Loyalty Programme Intelligence
-
-```
-Before search: Check loyalty programmes → auto-apply membership numbers
-During search: Score results with loyalty bonus → flag earning opportunities
-After search:  Track tier qualification → alert on status milestones
-After booking: Monitor loyalty implications of any price reshop alternatives
-After trip:    Update estimated points balance from scanned boarding passes
-```
-
-### Document Scanner Flow
-
-```
-User uploads photo → Detect document type → Extract all fields
-  → Boarding pass: Update trip + loyalty tracker
-  → Receipt: Log expense + update running total
-  → Booking confirmation: Create trip + activate price reshop
-  → Hotel bill: Compare against booked rate + flag overcharges
-```
-
----
-
-## Installation
-
-### Option 1: Claude Code CLI
-
-```bash
-claude plugin install /path/to/claude-travel-agent
-```
-
-### Option 2: Claude Cowork Desktop App (Local Upload)
-
-1. Download or clone this repository
-2. Zip the `claude-travel-agent` folder (the folder containing `.claude-plugin/`)
-3. Open Claude Cowork desktop app
-4. Go to **Browse Plugins** > **Personal** > click the **"+"** button
-5. Select the zip file
-6. The plugin will install and show up under Personal plugins
-
-### Option 3: From GitHub
-
+**Claude Code CLI:**
 ```bash
 claude plugin install https://github.com/mlobo2012/claude-travel-agent
 ```
 
----
-
-## MCP Server Setup
-
-This plugin uses five core MCP servers plus two optional connectors. They are configured in `.mcp.json` and run automatically via `npx` — no global installation needed. You just need **Node.js 18+** with `npx` in your PATH.
-
-### Core MCPs (zero API keys required)
-
-| Server | Package | What it does |
-|--------|---------|-------------|
-| **Airbnb** | [`@openbnb/mcp-server-airbnb`](https://www.npmjs.com/package/@openbnb/mcp-server-airbnb) | Search Airbnb listings, property details, availability |
-| **Google Flights** | [`google-flights-mcp-server`](https://www.npmjs.com/package/google-flights-mcp-server) | Flight routes, prices, schedules, date grids |
-| **Public Transport** | [`mcp-server-public-transport`](https://www.npmjs.com/package/mcp-server-public-transport) | European/international train and bus routes |
-| **TfL** | [`@daanrongen/tfl-mcp`](https://www.npmjs.com/package/@daanrongen/tfl-mcp) | London transport journey planning |
-| **Ferryhopper** | Remote: `https://mcp.ferryhopper.com/mcp` | European ferry routes and schedules |
-
-All core MCPs work out of the box with no API keys.
-
-### Optional Power-User MCPs
-
-These are **not** included in the default `.mcp.json` — add them manually if you want enhanced coverage:
-
-| Server | How to add | What it adds |
-|--------|-----------|-------------|
-| **Google Maps** | Requires `GOOGLE_MAPS_API_KEY` | Walking/driving directions, place details |
-| **SNCF** | Check npm for SNCF MCP servers | Enhanced French rail coverage |
-| **Deutsche Bahn** | Check npm for DB MCP servers | Enhanced German rail coverage |
-| **National Rail** | Check npm for UK rail MCP servers | Enhanced UK rail coverage |
-
-To add an optional MCP, edit `.mcp.json` and add the server entry.
-
-### Verifying MCP Servers
-
-After installing the plugin, check that MCP servers are connected:
-
-```
-# In Claude Code, ask:
-"What MCP tools are available?"
-
-# You should see tools from airbnb, google-flights, public-transport, tfl, and ferryhopper
+**From a local clone:**
+```bash
+git clone https://github.com/mlobo2012/claude-travel-agent.git
+claude plugin install ./claude-travel-agent
 ```
 
-If servers fail to start, ensure you have Node.js 18+ and npx available in your PATH.
+**Claude Cowork (desktop app):**
+1. Download or clone this repository
+2. Zip the `claude-travel-agent` folder
+3. Open Cowork → Browse Plugins → Personal → click **"+"**
+4. Select the zip file
+
+### MCP Servers
+
+The plugin ships with five core MCP servers configured in `.mcp.json`. They run via `npx` automatically — no API keys needed.
+
+| Server | What it does |
+|--------|-------------|
+| **Airbnb** | Accommodation search, property details, availability |
+| **Google Flights** | Flight routes, prices, schedules |
+| **Public Transport** | European/international train and bus routes |
+| **TfL** | London transport journey planning |
+
+Two optional connectors add extra capabilities:
+
+| Connector | What it adds | Setup |
+|-----------|-------------|-------|
+| **Gmail** | Booking confirmation detection | Grant read-only permissions when prompted |
+| **Google Calendar** | Trip events, reminders | Grant read-write permissions when prompted |
+
+### Verify Setup
+
+After installing, ask Claude: "What MCP tools are available?" You should see tools from airbnb, google-flights, public-transport, and tfl.
 
 ---
 
-## Optional Connectors
+## Getting Started
 
-These connectors enable additional features. They are optional — the core search and planning features work without them.
+### Onboarding
 
-### Gmail (Booking Detection + Document Scanning)
+Onboarding is **optional**. The plugin builds your profile organically from conversation — every time you mention your home city, companions, loyalty numbers, or preferences, they're captured silently.
 
-- **Purpose:** Read-only access to detect booking confirmation emails from airlines and accommodation platforms. The document scanner can also offer to auto-scan confirmations from your inbox.
-- **Setup:** When prompted by Cowork, grant Gmail read-only permissions
-- **What it reads:** Only booking confirmations from known airline and hotel senders (Ryanair, easyJet, BA, Airbnb, Booking.com, etc.)
-- **Privacy:** Never sends, deletes, or modifies emails. Only extracts booking references and dates.
+To do a full profile setup explicitly: `/travel-setup`
 
-### Google Calendar (Trip Events)
+This asks about your home airport, travel style, children, accommodation preferences, budget, loyalty programmes, passport details, and more. Everything is saved and applied to future searches.
 
-- **Purpose:** Create calendar events for flights, accommodation, activities, and reminders
-- **Setup:** When prompted by Cowork, grant Google Calendar read-write permissions
-- **What it creates:** Flight events (with airport buffer times), check-in/check-out events, activity events, packing reminders, trip date blocks
+### Quick Start Without Onboarding
+
+Just ask a travel question:
+
+> Find me flights to Sicily in May for 2 adults
+
+The plugin will ask only the 2-3 missing details it needs, run the search, and silently save what you told it for next time.
+
+---
+
+## How Persistence Works
+
+The plugin uses a **dual-persistence** model:
+
+| Store | Role | Reliability |
+|-------|------|------------|
+| **Project file** (`${CLAUDE_PLUGIN_DATA}/travel-profile.json`) | Primary, authoritative | Reliable within the same Claude Code project |
+| **Claude memory** (markdown summary pushed to Claude's memory system) | Best-effort backup | May persist across projects/environments, but not guaranteed |
+
+**How it works:**
+- Every profile save writes to **both** stores
+- On load, the plugin tries the file first, then Claude's memory, then asks you
+- If Claude's memory has data but the file doesn't, it reconstructs and re-saves the file
+
+**Limitations:**
+- Cross-project persistence depends on Claude's memory system surfacing the data — this is best-effort
+- In Cowork, the file store is session-scoped, so Claude memory is the only persistence path
+- Claude memory stores a markdown summary, not the full JSON — some minor detail may be lost on reconstruction
 
 ---
 
 ## Commands
 
-| Command | Description |
+| Command | What it does |
 |---------|-------------|
-| `/onboarding` | First-time setup — conversational questions to build your travel profile (transport preferences, children's ages, loyalty programmes) |
-| `/memory-manager` | View your saved travel preferences |
-| `/memory-manager update` | Update a specific preference |
-| `/memory-manager history` | See your past trips |
-| `/flight-search` | Search for flights with live-verified prices |
-| `/train-search` | Search for trains with child fare policies |
-| `/ferry-search` | Search for ferries with cabin options |
-| `/accommodation-search` | Search Airbnb and Booking.com |
-| `/trip-planner` | Full end-to-end trip planning (parallel agent search + transport intelligence + local transit) |
-| `/price-monitor` | Set up or manage pre-booking price watches |
-| `/loyalty-manager` | View, add, update, or check status of loyalty programmes |
-| `/travel-expenses` | Generate an expense report for a trip (supports `--daily` and `--vat` flags) |
-| `/trip-pack` | Generate your pre-departure trip pack |
+| `/travel-setup` | Full profile onboarding (optional — profile builds from conversation too) |
+| `/travel-profile` | View your saved preferences |
+| `/travel-profile update` | Update a specific preference |
+| `/find-flights` | Search flights with live prices and deep booking links |
+| `/find-trains` | Search trains with child fares and operator deep links |
+| `/find-ferries` | Search ferries with cabin options and operator deep links |
+| `/find-accommodation` | Search Airbnb and Booking.com with preference scoring |
+| `/plan-trip` | Full end-to-end trip planning (parallel agents + transport intelligence) |
+| `/loyalty-manager` | View, add, or manage loyalty programmes |
+| `/price-monitor` | Set up pre-booking price watches |
+| `/travel-expenses` | Generate expense report from scanned receipts |
+| `/trip-pack` | Generate a pre-departure trip document |
 | `/feedback` | Record post-trip feedback to improve future results |
 | `/travel-help` | Quick reference for all commands |
 
-**Tip:** Run `/onboarding` first to get personalised results from day one — including loyalty programmes!
+---
+
+## Example Prompts
+
+**Family trip planning:**
+> Plan a trip to Paris for me and my two kids (ages 5 and 8). We're in London. Mid-May, 4 nights.
+
+The plugin recommends Eurostar (kids 30% off, free bags) over flights, finds family-friendly Airbnbs, plans kid-friendly activities, and provides TfL connections from St Pancras.
+
+**Flight search with loyalty:**
+> Find me flights to New York from Heathrow, late June, 2 people
+
+Results include BA with your Executive Club number pre-filled in the booking link, plus alternatives with loyalty tradeoff explained.
+
+**Challenge a recommendation:**
+> Why didn't you suggest the Holiday Inn?
+
+The plugin explains the scoring: "Holiday Inn scored 45 vs Marriott's 72 because (1) no loyalty match, (2) 'basic breakfast' is in your avoid tags from your Birmingham trip, (3) review score 3.8 vs your 4.0 minimum."
+
+**Post-booking monitoring:**
+> I booked that BA flight to NYC for £450
+
+Confirms, logs the booking, and starts automatic price monitoring. If the price drops: "PRICE DROP: BA LHR→JFK dropped to £380. Net savings after cancellation: £70. Your Avios are preserved. [Rebook now]"
+
+**Document scanning:**
+> *Upload a hotel bill photo*
+
+"Your Marriott bill shows £189/night but your booking was £165/night — that's £48 overcharged across 2 nights. Added to your NYC trip expenses (total: £1,247 / £1,500 budget)."
 
 ---
 
-## Use Cases
+## Booking Links
 
-### Family Travel with Loyalty Intelligence
-"Plan a trip to Paris for me and my two kids (ages 5 and 8), from London"
-- Proactively recommends Eurostar (2h17, kids ~30% off, unlimited free bags vs £25-45/bag on flights)
-- **Why this?** "You have Eurostar Club Eurostar membership, kids under 12 get 30% off, and you rated your last Eurostar trip 5/5. Your eco preference also favours train."
-- Shows family-friendly Airbnb listings with reasoning for each
-- Provides St Pancras → accommodation connection via TfL
+Every search result includes a **deep booking link** that takes you directly to the specific option with route, dates, and passengers pre-filled. The plugin never links to a generic homepage.
 
-### Post-Booking Price Drop
-"I booked that BA flight to NYC for £450"
-- Confirms booking, extracts details, starts price reshop monitoring
-- 3 days later: "PRICE DROP: Your BA LHR→JFK flight dropped from £450 to £380. BA allows free cancellation within the fare rules — net savings: £70. You'd keep your Avios. [Rebook now]"
+**Coverage:**
+- **Flights:** Ryanair, easyJet, BA, Wizz Air, Vueling, Lufthansa, KLM, Air France, Iberia, TAP, Aer Lingus, Norwegian, SAS, Turkish Airlines, Emirates, Qatar Airways — plus Google Flights fallback for any other airline
+- **Trains:** Eurostar, Trainline, Deutsche Bahn, SNCF, Omio, Amtrak, Italo, Renfe
+- **Ferries:** DFDS, Stena Line, P&O, Brittany Ferries, Blue Star, Viking Line, Jadrolinija, Irish Ferries, Color Line — plus Ferryhopper/Direct Ferries fallback
+- **Hotels:** Airbnb (with dates + guests), Booking.com, Marriott (with Bonvoy number), Hilton, IHG, Accor
 
-### Document Scanning
-*User uploads hotel bill photo*
-- "Your Marriott bill shows £189/night but your booking was £165/night — that's £48 overcharged across 2 nights. I'd recommend querying this at checkout. Added to your NYC trip expenses (total: £1,247 / £1,500 budget — 83%)."
+Link text always names the specific option: `Book BA548 LHR→FCO 14 May` — not `Search on Google Flights`.
 
-### Loyalty Tier Warning
-"Find me flights to Berlin next month"
-- Shows options with loyalty callout: "You need 2 more BA flights before March 31 to keep Gold status. This BA flight (£40 more than easyJet) would count as a qualifying flight. The easyJet option saves money but earns nothing."
+Loyalty membership numbers are included in booking URLs where the platform supports it. Where it doesn't, the plugin advises logging in before booking.
 
-### Business Trip
-"I need to be in DC on Tuesday for meetings, flying from NYC"
-- Shows Acela (2h45, Penn Station to Union Station) alongside flights
-- **Why Acela first?** "Total door-to-door time is similar, but your profile says comfort priority for work trips. Train avoids airport security and you can work onboard. Your Amtrak Guest Rewards number has been applied."
-
-### Challenge a Recommendation
-"Why didn't you suggest the Holiday Inn?"
-- "Holiday Inn scored 45 vs Marriott's 72. It was filtered because: (1) no loyalty programme match (-10), (2) you marked 'basic breakfast' as an avoid tag after your Birmingham trip in January (-50), (3) review score 3.8 vs your 4.0 minimum. Want me to remove the breakfast filter?"
+**Current limitations:**
+- Deep link URL templates are best-effort — airline and operator websites occasionally change their URL structure, which may cause a link to load a search page instead of the exact result. The fallback hierarchy (operator direct → aggregator → search with route pre-filled) handles this gracefully.
+- Some platforms don't support child parameters or loyalty numbers in URLs — the plugin notes this and advises manual entry.
 
 ---
 
-## How It Works
+## How Transport Intelligence Works
 
-### Transport Intelligence
-
-Before any transport search, the agent:
-1. Reads your profile (transport preference, children's ages, budget, loyalty programmes)
+Before any transport search, the plugin:
+1. Reads your profile (transport preference, children, budget, loyalty programmes)
 2. Checks the route against 30+ known train-competitive routes
-3. Applies proactive rules (under 4h train + kids → lead with train)
-4. Checks loyalty programme implications for each mode
-5. Recommends the best option first with full reasoning transparency
-
-### Parallel Agent Search
-
-When you use `/trip-planner`, three specialist agents search simultaneously:
-
-1. **flight-searcher** — Queries Google Flights MCP for all matching routes
-2. **accommodation-searcher** — Queries Airbnb MCP for matching listings
-3. **activities-researcher** — Researches activities, restaurants, and day trips via web search
-
-Results are combined into a unified trip plan with transport, accommodation, activities, practical info, and budget summary — each with a **Why this?** reasoning block.
-
-### Persistent Memory
-
-Your travel profile is stored in Cowork's persistent memory:
-- `travel_profile` — full preference profile (including loyalty programmes)
-- `travel_derived_preferences` — learned prefer/avoid tags
-- `travel_feedback` — post-trip feedback history
-- `travel_past_trips` — trip history with outcomes
-- `travel_reasoning_effectiveness` — which recommendation factors you actually respond to
-
-Preferences are automatically refined after every search interaction and trip feedback.
-
-### Research Pipeline
-
-Every search follows a 3-stage quality pipeline:
-
-1. **Live Retrieval** — Query MCP servers for real-time data
-2. **Cross-Check** — Verify prices on a second source (web search fallback)
-3. **Quality Filter** — Apply minimum review thresholds, preference scoring, loyalty scoring, and present top 3 with reasoning
-
-### Anti-Hallucination Rules
-
-- Every price is retrieved live and timestamped
-- No rounding, estimating, or inferring prices
-- Cross-check discrepancies >5% are flagged with both values
-- Missing data is explicitly noted, never fabricated
-- Direct booking links are verified, not constructed
-
-### Preference Scoring
-
-Results are ranked using your profile:
-- **+15 points** for each matching preference
-- **-50 points** for each matching "avoid" tag
-- **+20 points** for transport mode matching your preference
-- **+10 points** for child-friendly features (when travelling with children)
-- **+10 points** for loyalty programme match (alliance partner or direct)
-- Score below 0 = excluded from results
-
-### Data Storage
-
-- **Primary:** Cowork persistent memory (survives across sessions)
-- **Secondary backup:** `~/.claude/plugins/data/ai-heroes-travel-agent/travel-profile.json`
-- **Trip plans:** `~/.claude/plugins/data/ai-heroes-travel-agent/trips/`
-- **Booked trips:** `~/.claude/plugins/data/ai-heroes-travel-agent/booked-trips.json`
-- **Expense log:** `~/.claude/plugins/data/ai-heroes-travel-agent/expense-log.json`
-- **Reasoning effectiveness:** `~/.claude/plugins/data/ai-heroes-travel-agent/reasoning-effectiveness.json`
+3. Applies rules: under 4h by train + kids → lead with train; island routes → lead with ferry; cross-channel → always show Eurostar
+4. Checks loyalty implications for each mode
+5. Recommends the best option first with full reasoning
 
 ---
 
 ## Child & Family Quick Reference
 
 | Operator | Free Under | Discount | Luggage |
-|---|---|---|---|
+|----------|-----------|----------|---------|
 | Eurostar | 4 (on lap) | 4–11: ~30% off | Unlimited free |
 | UK National Rail | 5 | 5–15: 50% off | Unlimited free |
 | Deutsche Bahn | 6 | 6–14: FREE with adult | Unlimited free |
 | SNCF (TGV) | 4 | 4–11: ~30% off | Unlimited free |
 | Amtrak | 2 (on lap) | 2–12: 50% off | 5 free items |
-| Most airlines | 2 (on lap, ~10% fare) | 2+: full fare | £25–45/bag |
+| Most airlines | 2 (on lap, ~10%) | 2+: full fare | £25–45/bag |
 
 ---
 
-## MCP Servers — Status
+## Troubleshooting
 
-| Server | Status | Package |
-|--------|--------|---------|
-| Airbnb | Real (MCP) | `@openbnb/mcp-server-airbnb` |
-| Google Flights | Real (MCP) | `google-flights-mcp-server` |
-| Public Transport | Real (MCP) | `mcp-server-public-transport` |
-| TfL | Real (MCP) | `@daanrongen/tfl-mcp` |
-| Ferryhopper | Remote (MCP) | `https://mcp.ferryhopper.com/mcp` |
-| Gmail | Connector (HTTP) | Google Gmail MCP — read-only, optional |
-| Google Calendar | Connector (HTTP) | Google Calendar MCP — read-write, optional |
-| Booking.com | Fallback (web search) | No working MCP — uses web search for cross-checking |
-| Skyscanner | Fallback (web search) | No working MCP — uses web search for cross-checking |
-| Trainline | Fallback (web search) | No working MCP — uses web search for cross-checking |
+**MCP servers not starting:** Ensure Node.js 18+ is installed and `npx` is in your PATH. Run `npx @openbnb/mcp-server-airbnb --help` to test.
 
----
+**"No profile found" on a new session:** The plugin will try the file first, then Claude's memory. If both are empty, it asks you. Profile persistence within the same project is reliable. Cross-project persistence depends on Claude's memory system.
 
-## Plugin Structure
+**Booking link loads a generic search page:** Airline/operator websites occasionally change their URL structure. The plugin's fallback hierarchy handles this — if the direct link doesn't work, it falls back to an aggregator link with the route pre-filled.
 
-```
-claude-travel-agent/
-├── .claude-plugin/
-│   └── plugin.json                         # Plugin manifest (v2.2.0)
-├── .mcp.json                               # MCP server + connector configuration (7 servers)
-├── agents/                                 # Agent Teams (v2.0)
-│   ├── flight-agent.md                     # Flight search specialist
-│   ├── accommodation-agent.md              # Accommodation search specialist
-│   └── activities-agent.md                 # Activities researcher
-├── skills/
-│   ├── travel-agent/SKILL.md               # Core identity and rules
-│   ├── transport-intelligence/SKILL.md     # Proactive transport mode selection (v2.1)
-│   ├── reasoning-transparency/SKILL.md     # Why This? reasoning on every recommendation (v2.2)
-│   ├── loyalty-manager/SKILL.md            # Loyalty programme intelligence (v2.2)
-│   ├── price-reshop/SKILL.md              # Post-booking price re-shopping (v2.2)
-│   ├── document-scanner/SKILL.md           # Receipt, boarding pass, hotel bill scanning (v2.2)
-│   ├── train-search/SKILL.md               # Train route search (v2.1)
-│   ├── ferry-search/SKILL.md               # Ferry route search (v2.1)
-│   ├── local-transit/SKILL.md              # Last-mile connections (v2.1)
-│   ├── onboarding/SKILL.md                 # First-time profile setup (updated v2.2)
-│   ├── accommodation-search/SKILL.md       # Airbnb + Booking.com search
-│   ├── flight-search/SKILL.md              # Google Flights search
-│   ├── trip-planner/SKILL.md               # End-to-end trip planning (agent teams + transport intelligence)
-│   ├── memory-manager/SKILL.md             # Travel profile management
-│   ├── feedback/SKILL.md                   # Post-trip feedback (learning engine)
-│   ├── research-pipeline/SKILL.md          # 3-stage quality pipeline (auto)
-│   ├── guardrails/SKILL.md                 # Anti-hallucination rules (auto)
-│   ├── persistent-memory/SKILL.md          # Memory integration (auto)
-│   ├── price-monitor/SKILL.md              # Pre-booking price monitoring (v2.0)
-│   ├── trip-reminders/SKILL.md             # Pre-trip reminders (auto, v2.0)
-│   ├── trip-pack/SKILL.md                  # Trip pack generation (v2.0)
-│   ├── booking-detection/SKILL.md          # Gmail detection (auto, v2.0)
-│   └── calendar-integration/SKILL.md       # Calendar events (auto, v2.0)
-├── commands/
-│   ├── travel-help.md                      # /travel-help quick reference
-│   └── travel-expenses.md                  # /travel-expenses expense report (v2.2)
-├── LICENSE
-└── README.md
-```
-
----
-
-## Try It Out
-
-After installation and `/onboarding`, test with:
-
-> Plan a trip to Paris for me and my two kids (ages 5 and 8). We're in London. Mid-May, 4 nights. I want the entire trip planned out.
-
-You should see: Eurostar recommended with a **Why this?** reasoning block, real Airbnb listings with reasoning, TfL connection from St Pancras, a day-by-day itinerary with kid-friendly activities, loyalty programme applied, and practical info — all timestamped and source-attributed.
-
-**More tests:**
-
-- **Reasoning transparency:** "Why did you suggest that hotel?" → see the full score breakdown
-- **Loyalty intelligence:** "/loyalty-manager add" → add your BA Executive Club, then search flights
-- **Document scanning:** Upload a photo of a boarding pass or hotel receipt
-- **Price reshop:** "I booked that easyJet flight" → automatic post-booking monitoring starts
-- **Expense report:** "/travel-expenses" after uploading some receipts
-- **Challenge a recommendation:** "Why didn't you suggest the Hilton?"
-- **Agent Teams:** "Plan a trip to Punta Secca in Sicily, mid-May, 4 people, direct flights from London"
-- **Price monitoring:** "Watch the easyJet flight price for me"
-- **Persistent memory:** "What do you remember about my travel preferences?"
-- **Trip pack:** "Send me my trip pack"
+**Gmail/Calendar not connecting:** These are optional connectors that require permission grants. The core search and planning features work without them.
 
 ---
 
 ## Development
 
-### Validating
-
 ```bash
+# Validate the plugin
 claude plugin validate
-```
 
-### Testing Locally
-
-```bash
+# Test locally
 claude --plugin-dir ./claude-travel-agent
 ```
+
+---
+
+## Version History
+
+| Version | Date | Highlights |
+|---------|------|-----------|
+| **2.4.0** | 2026-04-03 | Dedicated booking-links skill (canonical URL reference for 15+ airlines, 8+ rail, 10+ ferry, 6+ hotel platforms). Explicit primary/backup persistence architecture. Clean README rewrite. |
+| **2.3.1** | 2026-03-28 | Cross-session persistence fix with dual-persistence strategy. Deep booking links for 7+ airlines, trains, ferries, hotels. Enhanced onboarding (seat, personal details, passport). |
+| **2.2.0** | 2026-03-15 | Post-booking price re-shopping. Reasoning transparency ("Why this?"). Loyalty programme intelligence. Document scanner and expense tracking. |
+| **2.1.0** | 2026-03-01 | Multi-modal transport (trains, ferries, local transit). Proactive transport intelligence. Family-aware child fare policies. 30+ route knowledge base. |
+| **2.0.0** | 2026-02-15 | Persistent memory. Parallel agent search. Price monitoring. Pre-trip reminders. Trip packs. Gmail booking detection. Google Calendar integration. |
 
 ---
 
@@ -505,8 +247,6 @@ claude --plugin-dir ./claude-travel-agent
 MIT
 
 ---
-
-## Credits
 
 Built by [AI Heroes](https://www.ai-heroes.co) — AI That Learns How You Win.
 

@@ -22,10 +22,11 @@ Show the user the travel agent quick reference, key commands, and what the plugi
 ## Key Capabilities
 
 - Flights + accommodation with live MCP data
+- **Deep booking links** — every result links to the specific option with dates/passengers pre-filled (15+ airlines, 8+ rail, 10+ ferry, 6+ hotel platforms)
 - Proactive transport mode intelligence (train vs flight vs ferry)
 - Loyalty programme tracking and auto-apply
 - Price monitoring and post-booking re-shopping
 - Document scanning for receipts and boarding passes
 - "Why this?" reasoning on every recommendation
 - Gmail booking detection and Calendar integration
-- Trip memory and feedback learning
+- Trip memory and feedback learning (primary file + Claude memory backup)

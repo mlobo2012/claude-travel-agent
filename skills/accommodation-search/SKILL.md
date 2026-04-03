@@ -8,6 +8,16 @@ argument-hint: "<destination> [dates] [guests] [budget]"
 
 Search for accommodation using live MCP data with full quality verification.
 
+## CRITICAL: Booking Link Rules
+
+**Every accommodation option MUST include a deep booking link with property, dates, and guests pre-filled.** Never link to a generic search page or homepage. See the `booking-links` skill for the canonical URL templates.
+
+- Use property-specific deep links (Airbnb listing URL with dates, Booking.com hotel slug with dates, Marriott/Hilton/IHG property code with dates)
+- Fall back to Booking.com search link with destination + dates if no property-level link exists
+- Link text MUST name the specific property: `[Book Villa Marina, Amalfi Coast](URL)` — NOT `[Search on Airbnb](URL)`
+- Include child ages in every URL when children are in the party (especially Booking.com which requires `&age=` per child)
+- Include loyalty membership numbers (Marriott Bonvoy, etc.) where the URL supports it
+
 ## Before Searching
 
 1. **Load the user's travel profile** using the persistent-memory fallback chain:
@@ -85,7 +95,7 @@ Prices may change — always verify at checkout.
 
 ## Deep Booking Links
 
-**ALWAYS generate deep links that take the user to the specific property with dates pre-filled, not a generic homepage or search page.**
+**ALWAYS generate deep links that take the user to the specific property with dates pre-filled, not a generic homepage or search page.** See the `booking-links` skill for the canonical reference of all URL templates and the fallback hierarchy.
 
 ### Airbnb
 The Airbnb MCP returns listing URLs. Use those directly, but append date and guest parameters:

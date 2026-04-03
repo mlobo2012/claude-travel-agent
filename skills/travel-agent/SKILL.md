@@ -14,14 +14,14 @@ You plan and facilitate trips end-to-end: flights, trains, ferries, accommodatio
 
 ## CRITICAL: Profile Loading at Conversation Start
 
-**At the START of any travel-related conversation, ALWAYS load the profile using the persistent-memory fallback chain:**
+**At the START of any travel-related conversation, ALWAYS load the profile using the persistence fallback chain:**
 
-1. **Try the file first:** Read `${CLAUDE_PLUGIN_DATA}/travel-profile.json` with the Read tool
-2. **If file not found or empty, try Claude's memory:** Check your own memory system for travel profile facts (home airport, companions, loyalty programmes, preferences, etc.)
-3. **If memory has data but file doesn't:** Reconstruct the profile JSON from memory and re-save it to the file for faster access next time
+1. **Try the primary file store first:** Read `${CLAUDE_PLUGIN_DATA}/travel-profile.json` with the Read tool — this is the authoritative source
+2. **If file not found or empty, try Claude's memory (backup):** Check your own memory system for travel profile facts (home airport, companions, loyalty programmes, preferences, etc.) — this is best-effort, not guaranteed
+3. **If memory has data but file doesn't:** Reconstruct the profile JSON from memory and re-save it to the primary file store for faster access next time
 4. **If NEITHER has data:** Ask 2-3 quick questions relevant to the current query. After answering, offer full onboarding: "Want me to save your preferences for next time? Run `/travel-setup` for full onboarding."
 
-**NEVER say "no profile found" without trying BOTH the file AND Claude's memory.** The profile may exist in only one location depending on the environment.
+**NEVER say "no profile found" without trying BOTH the primary file store AND Claude's memory backup.** The profile may exist in only one location depending on the environment.
 
 ## Progressive Profile Capture — Build the Profile From Conversation
 
@@ -32,10 +32,10 @@ When the user says things like "I'm flying from London Heathrow, travelling with
 - Companions: partner + 1 child (age 2)
 - Loyalty: BA Executive Club Gold #12345678
 
-Save these to the profile using the dual-persistence approach (file + Claude's auto-memory). Do this **silently** — don't interrupt the conversation to announce "I've saved your preferences!" Just capture and continue.
+Save these to the profile using the dual-persistence approach (primary file store + Claude memory backup). Do this **silently** — don't interrupt the conversation to announce "I've saved your preferences!" Just capture and continue.
 
 **On first travel interaction in a new session:**
-1. Load profile via fallback chain (file → auto-memory → scattered memories)
+1. Load profile via fallback chain: primary file → Claude memory backup → scattered memories
 2. If no profile exists, scan Claude's existing memories for ANY travel-relevant facts from other conversations
 3. Use whatever you find — a partial profile is better than starting from scratch
 4. Only run explicit onboarding if the user requests it (`/travel-setup`) or if you have zero information after checking all sources
@@ -97,8 +97,9 @@ Before every search:
 ## Profile Updates — Dual Persistence
 
 After every profile change (new preference, feedback, derived tag):
-- **Save to BOTH** the file (`${CLAUDE_PLUGIN_DATA}/travel-profile.json`) AND Claude's memory
-- The file is the primary structured store; memory is the cross-session fallback
+- **Save to BOTH** the primary file store (`${CLAUDE_PLUGIN_DATA}/travel-profile.json`) AND Claude's memory (backup)
+- The file is the **primary, authoritative store**; Claude memory is a **best-effort backup** for cross-session/cross-project fallback
+- Claude memory backup is not guaranteed to persist — always prioritise the file store when available
 
 ## Reasoning Transparency
 

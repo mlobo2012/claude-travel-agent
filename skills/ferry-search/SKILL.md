@@ -8,6 +8,16 @@ argument-hint: "<origin> to <destination> [dates] [preferences]"
 
 Search for ferry routes using live MCP data with full quality verification.
 
+## CRITICAL: Booking Link Rules
+
+**Every ferry option MUST include a deep booking link with route, dates, and passengers pre-filled.** Never link to a generic operator homepage. See the `booking-links` skill for the canonical URL templates.
+
+- Use operator direct deep links (DFDS, Stena Line, P&O, Brittany Ferries, Blue Star, Viking Line, etc.) as first priority
+- Fall back to Ferryhopper or Direct Ferries deep links with route + dates if no operator template exists
+- Link text MUST name the specific option: `[Book DFDS Dover→Calais 14:30 25 May](URL)` — NOT `[Search on Ferryhopper](URL)`
+- Include child parameters in every URL when children are travelling
+- Include vehicle parameters when the user is travelling with a car/motorbike
+
 ## Before Searching
 
 1. **Use the Read tool** on `${CLAUDE_PLUGIN_DATA}/travel-profile.json` to load the user's travel profile. Follow the persistent-memory fallback chain: file first, then Claude's memory, then ask the user.
@@ -75,7 +85,7 @@ Book direct with the operator for best availability, especially in peak season.
 
 ## Deep Booking Links
 
-**ALWAYS generate deep links that take the user to the specific route search, not a generic homepage.** Construct deep booking links with route, dates, and passenger count pre-filled where possible.
+**ALWAYS generate deep links that take the user to the specific route search, not a generic homepage.** Construct deep booking links with route, dates, and passenger count pre-filled where possible. See the `booking-links` skill for the canonical reference of all URL templates and the fallback hierarchy.
 
 For known ferry platforms and operators, construct deep links:
 

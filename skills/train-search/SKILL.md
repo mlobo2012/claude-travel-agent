@@ -8,6 +8,16 @@ argument-hint: "<origin> to <destination> [dates] [preferences]"
 
 Search for train routes using live MCP data with full quality verification.
 
+## CRITICAL: Booking Link Rules
+
+**Every train option MUST include a deep booking link with route, dates, and passengers pre-filled.** Never link to a generic operator homepage. See the `booking-links` skill for the canonical URL templates.
+
+- Use operator direct deep links (Eurostar, Deutsche Bahn, SNCF, Amtrak, Italo, Renfe) as first priority
+- Fall back to Trainline EU or Omio deep links with route + dates if no operator template exists
+- Link text MUST name the specific option: `[Book Eurostar 9014 London→Paris 08:01](URL)` — NOT `[Search on Eurostar](URL)`
+- Include child/youth parameters in every URL when children are travelling
+- Mention loyalty programmes (Club Eurostar, BahnCard, Railcards) with advice to log in or apply at checkout
+
 ## Before Searching
 
 1. **Load the user's travel profile** using the persistent-memory fallback chain:
@@ -73,7 +83,7 @@ Book direct with the operator for best prices. Advance tickets are usually cheap
 
 ## Deep Booking Links
 
-**ALWAYS generate deep links that take the user to the specific journey, not a generic homepage.**
+**ALWAYS generate deep links that take the user to the specific journey, not a generic homepage.** See the `booking-links` skill for the canonical reference of all URL templates and the fallback hierarchy.
 
 For known operators, construct deep links with dates, route, and passenger count pre-filled:
 

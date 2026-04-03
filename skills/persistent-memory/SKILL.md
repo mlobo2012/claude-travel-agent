@@ -6,15 +6,30 @@ user-invocable: false
 
 # Persistent Memory — Dual Persistence for Travel Profiles
 
-This skill governs how the AI Heroes Travel Agent persists travel data across sessions. It uses a **dual-persistence** strategy so the profile survives in both Claude Code and Cowork environments.
+This skill governs how the AI Heroes Travel Agent persists travel data across sessions. It uses a **dual-persistence** strategy with a clear primary/backup architecture.
 
-## Why Dual Persistence?
+## Persistence Architecture
 
-- **Claude Code**: `${CLAUDE_PLUGIN_DATA}` resolves to `~/.claude/plugins/data/{plugin-id}/` and persists across sessions. File-based storage is reliable here.
-- **Cowork**: `${CLAUDE_PLUGIN_DATA}` resolves to a session-scoped ephemeral path that does NOT persist. Files are lost between sessions.
-- **Claude's memory system**: Works in both environments. Claude can save and recall facts using its built-in memory/auto-memory feature.
+### Primary Store: Same-Project File Storage (Option A)
 
-By saving to BOTH, the profile is available regardless of environment.
+`${CLAUDE_PLUGIN_DATA}/travel-profile.json` is the **primary, authoritative store**. In Claude Code this resolves to `~/.claude/plugins/data/{plugin-id}/` and persists reliably across all sessions within the same project.
+
+This is the fastest, most complete, and most reliable persistence path.
+
+### Backup Store: Claude Memory (Option B)
+
+As a **best-effort backup**, the travel profile is also pushed to Claude's built-in memory system. This serves two purposes:
+
+1. **Cross-environment fallback**: In Cowork where `${CLAUDE_PLUGIN_DATA}` is session-scoped and ephemeral, Claude memory is the only persistence path.
+2. **Cross-project fallback**: If the user starts a new Claude Code project, the file won't exist but Claude memory may surface the profile from a previous project.
+
+**Important limitations of the backup store:**
+- Claude memory is **best-effort, not guaranteed**. Claude may not always recall it, especially across different projects.
+- Claude memory stores a **markdown summary**, not the full JSON — some detail may be lost.
+- Cross-project persistence depends on Claude's memory system surfacing the data, which is not fully reliable.
+- The file store (Option A) should always be treated as the source of truth when available.
+
+By saving to BOTH stores every time, the profile has the best chance of surviving across sessions and environments.
 
 ---
 
@@ -29,9 +44,9 @@ By saving to BOTH, the profile is available regardless of environment.
 | `${CLAUDE_PLUGIN_DATA}/expense-log.json` | Scanned receipt and expense data |
 | `${CLAUDE_PLUGIN_DATA}/reasoning-effectiveness.json` | Recommendation effectiveness tracking |
 
-### Secondary: Claude's Auto-Memory System
+### Backup: Claude's Memory System (Best-Effort)
 
-After every profile save, also save key profile facts to Claude's auto-memory system. This is the critical fallback that enables cross-session persistence — especially in Cowork where the file path is ephemeral.
+After every profile save, also push key profile facts to Claude's memory system. This is the **backup fallback** that enables cross-session persistence when the file store is unavailable — especially in Cowork where the file path is ephemeral, or when starting a new project in Claude Code.
 
 **How Claude's auto-memory works:**
 - In **Claude Code**: Claude has a project-level memory directory (typically `~/.claude/projects/<project-hash>/memory/`). To save a memory, use the **Write tool** to create a markdown file in that directory with frontmatter (name, description, type), then update `MEMORY.md` in that directory.
@@ -59,14 +74,14 @@ Travel profile for AI Heroes Travel Agent:
 
 **Before ANY travel search, recommendation, or profile operation, you MUST follow this exact sequence:**
 
-### Step 1: Try the file
+### Step 1: Try the primary file store
 Use the **Read tool** on `${CLAUDE_PLUGIN_DATA}/travel-profile.json`.
 
-- If the file exists and contains valid JSON → **use it**. This is the most complete source.
+- If the file exists and contains valid JSON → **use it**. This is the authoritative source.
 - If the file doesn't exist, is empty, or returns an error → proceed to Step 2.
 
-### Step 2: Try Claude's auto-memory
-Search your auto-memory system for a memory file named "travel-profile" or containing "AI Heroes Travel Agent" or "travel profile". In Claude Code, look for a file like `travel_profile.md` or `travel-profile.md` in your project memory directory. Read the `MEMORY.md` index file first to find it.
+### Step 2: Try Claude's memory (backup)
+Search your memory system for a memory file named "travel-profile" or containing "AI Heroes Travel Agent" or "travel profile". In Claude Code, look for a file like `travel_profile.md` or `travel-profile.md` in your project memory directory. Read the `MEMORY.md` index file first to find it.
 
 Look for any of these data points:
 - Home airport and city
@@ -85,8 +100,8 @@ If memory contains profile data → **reconstruct the profile from memory** and 
 2. Use the **Write tool** to save to `${CLAUDE_PLUGIN_DATA}/travel-profile.json`
 3. Continue with the reconstructed profile
 
-### Step 3: Scan existing memories for travel-relevant information
-Before giving up, scan Claude's memory for ANY travel-relevant facts the user may have mentioned in previous non-travel conversations. Look for:
+### Step 3: Scan Claude's memory for scattered travel facts
+Before giving up, scan Claude's memory more broadly for ANY travel-relevant facts the user may have mentioned in previous conversations (even non-travel ones). Look for:
 - Cities mentioned as "home" or "I live in..."
 - Family composition (partner, children, ages)
 - Airline or hotel loyalty mentions
@@ -104,15 +119,15 @@ If no profile data exists anywhere:
 
 ## HOW TO SAVE THE PROFILE (Dual Write)
 
-**Every time the profile is created or updated, you MUST save to BOTH locations:**
+**Every time the profile is created or updated, you MUST save to BOTH the primary file store AND Claude's memory backup:**
 
-### Save Step 1: Write the file
+### Save Step 1: Write the primary file
 1. Build the complete profile JSON object
 2. Use the **Write tool** to save to `${CLAUDE_PLUGIN_DATA}/travel-profile.json`
 3. Confirm the file was written
 
-### Save Step 2: Save to Claude's auto-memory system
-Immediately after writing the file, you MUST save the profile to Claude's persistent memory. This is the step that enables cross-session persistence.
+### Save Step 2: Push to Claude's memory (backup)
+Immediately after writing the file, you MUST also push the profile to Claude's memory system as a best-effort backup. This enables cross-session persistence when the file store is unavailable.
 
 **In Claude Code:** Use the **Write tool** to create (or overwrite) a memory file in your project memory directory. The file should be named `travel_profile.md` and formatted as:
 
