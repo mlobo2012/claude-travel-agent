@@ -98,11 +98,21 @@ For known airlines, construct deep links with dates, route, and passenger count 
 - **Vueling:** `[Book this Vueling flight](https://www.vueling.com/en/booking/select?origin=XXX&destination=YYY&outboundDate=YYYY-MM-DD&inboundDate=YYYY-MM-DD&adults=N)`
 - **Lufthansa:** `[Book this Lufthansa flight](https://www.lufthansa.com/gb/en/flight-search?origin=XXX&destination=YYY&outDate=YYYY-MM-DD&inDate=YYYY-MM-DD&paxCombination=N-0-0-0-0)`
 - **KLM:** `[Book this KLM flight](https://www.klm.com/search/result?pax=N&cabin=ECONOMY&lang=en&origins=XXX&destinations=YYY&outDate=YYYY-MM-DD&inDate=YYYY-MM-DD)`
-- **For other airlines / fallback:** `[Book on Google Flights](https://www.google.com/travel/flights?q=Flights%20to%20YYY%20from%20XXX%20on%20YYYY-MM-DD)`
+- **For other airlines / fallback (Google Flights deep link):** `[Book AIRLINE FLIGHT_NUMBER ORIGIN→DESTINATION](https://www.google.com/travel/flights?q=Flights+from+XXX+to+YYY+on+YYYY-MM-DD+returning+YYYY-MM-DD&curr=GBP&px=N)`
+  - Replace spaces with `+`, include return date if round trip, currency from profile, passenger count
+  - Example: `[Book BA548 LHR→FCO](https://www.google.com/travel/flights?q=Flights+from+LHR+to+FCO+on+2026-05-14+returning+2026-05-21&curr=GBP&px=2)`
 
-**Format ALL booking links as proper markdown.** Never use angle brackets or plain text URLs.
+**Link text MUST name the specific option.** Write "Book BA548 LHR→FCO →" NOT "Search on Google Flights →". Every link label must include the airline, flight number (if known), and route. Format ALL booking links as proper markdown. Never use angle brackets or plain text URLs.
+
+**Children in URLs:** When children are in the party, include child parameters in every URL that supports them:
+- Ryanair: `&children=N&infants=N`
+- easyJet: `&children=N&infants=N`
+- BA: `&childCount=N&infantCount=N`
+- Lufthansa: update paxCombination: `N-0-CHILDREN-INFANTS-0`
 
 **Loyalty number inclusion:** When the user has a loyalty programme for the airline (or its alliance partner) and the booking URL supports it, include the membership number in the URL parameter. Mention it in the output: "Your [programme] number [XXXX] will be applied at booking."
+
+**Link verification (optional):** If a browser MCP or agent-browser tool is available, verify that the constructed booking URL loads the correct flight result before presenting it to the user. If the link doesn't resolve correctly, fall back to the Google Flights deep link with the route and dates pre-filled.
 
 ## Preference Matching
 

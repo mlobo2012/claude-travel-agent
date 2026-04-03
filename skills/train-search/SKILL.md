@@ -87,9 +87,19 @@ For known operators, construct deep links with dates, route, and passenger count
 - **Omio:** `[Book on Omio](https://www.omio.com/search-frontend/results/ORIGIN/DESTINATION?date=YYYY-MM-DD&passengers=N)`
 - **Amtrak:** `[Book on Amtrak](https://www.amtrak.com/tickets/departure.html?origin=XXX&destination=YYY&departing=MM/DD/YYYY&adults=N)`
 
-**Format ALL booking links as proper markdown.** Show "Book this train" not "Search on Trainline".
+**Link text MUST name the specific option.** Write "Book Eurostar 9014 London→Paris →" NOT "Search on Eurostar →" or "Book this train". Every link label must include the operator, service number (if known), and route. Format ALL booking links as proper markdown.
+
+**Children in URLs:** When children are in the party, include child/youth parameters in every URL that supports them:
+- Eurostar: `&child=N&youth=N` (child = 0-3, youth = 4-11)
+- Trainline: add `&passengers%5B%5D=YYYY-MM-DD%7Cchild` for each child
+- DB: `&reise.kinder=N`
+- SNCF: `&passengers=Nadult,Nchild` (e.g., `2adult,1child`)
+- Omio: `&passengers=Nadults,Nchildren`
+- Amtrak: `&children=N`
 
 **Loyalty integration:** When the user has a rail loyalty programme (e.g., Club Eurostar), mention it in the output and advise them to log in before booking. Include membership number where the URL supports it.
+
+**Link verification (optional):** If a browser MCP or agent-browser tool is available, verify that the constructed booking URL loads the correct journey before presenting it to the user. If the link doesn't resolve correctly, fall back to the operator's search page with dates and route pre-filled.
 
 ## Child & Family Fare Handling
 

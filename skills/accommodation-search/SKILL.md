@@ -103,9 +103,22 @@ When the listing is from a hotel chain, prefer the chain's direct booking link f
 - **IHG:** `[Book on IHG](https://www.ihg.com/hotels/us/en/find-hotels/hotel/rooms?qDest=HOTEL_NAME&qCiD=DD&qCiMy=MMYYYY&qCoD=DD&qCoMy=MMYYYY&qAdlt=N&qRms=1)`
 - **Accor:** `[Book on Accor](https://all.accor.com/ssr/app/accor/rates/HOTEL_ID/index.en.shtml?dateIn=YYYY-MM-DD&nights=N&compositions=N)`
 
-**Format ALL booking links as proper markdown.** Show "Book this property" not "Search on Airbnb".
+**When no specific hotel slug is available for Booking.com**, construct a search-level deep link with all parameters:
+- `[Book on Booking.com](https://www.booking.com/searchresults.html?ss=DESTINATION&checkin=YYYY-MM-DD&checkout=YYYY-MM-DD&group_adults=N&group_children=N&age=AGE1&age=AGE2&selected_currency=GBP&nflt=review_score%3D80)`
+- Include `&age=X` for each child's age (required for correct pricing)
+- Example: `[Book in Rome on Booking.com](https://www.booking.com/searchresults.html?ss=Rome&checkin=2026-05-14&checkout=2026-05-19&group_adults=2&group_children=1&age=2&selected_currency=GBP)`
+
+**Link text MUST name the specific property.** Write "Book Villa Marina, Amalfi →" NOT "Search on Airbnb →" or "Book this property". Every link label must include the property name and location. Format ALL booking links as proper markdown.
+
+**Children in URLs:** When children are in the party, include child parameters and ages:
+- Airbnb: `&children=N&infants=N` (infants = under 2)
+- Booking.com: `&group_children=N&age=AGE1&age=AGE2` (one `&age=` per child)
+- Marriott: `&childrenCount=N`
+- Hilton: `&room1NumChildren=N&room1Children1Age=AGE`
 
 **Loyalty integration:** When the user has a hotel loyalty programme matching the chain, mention it prominently and include the membership number in the URL where supported. Advise logging in before booking if the URL doesn't support pre-filling the membership.
+
+**Link verification (optional):** If a browser MCP or agent-browser tool is available, verify that the constructed booking URL loads the correct property or search results before presenting it to the user.
 
 ## Preference Matching
 

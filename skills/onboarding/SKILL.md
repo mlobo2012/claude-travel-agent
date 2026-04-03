@@ -8,22 +8,32 @@ argument-hint: ""
 
 You are running first-time onboarding for the AI Heroes Travel Agent. Your goal is to have a natural, conversational exchange that builds a complete travel preference profile.
 
+## IMPORTANT: Explicit Onboarding is Optional
+
+The travel profile builds **organically from conversation** via progressive capture (see persistent-memory skill). The user does NOT need to run `/travel-setup` to have a profile. Every time they mention travel-relevant details (home city, companions, loyalty numbers, preferences), those are captured silently into the profile.
+
+This explicit onboarding flow should ONLY run when:
+- The user explicitly asks (`/travel-setup`, "set up my travel preferences")
+- The user wants to do a comprehensive profile review/rebuild
+
 ## Before Starting
 
 Check if a profile already exists using the persistent-memory fallback chain:
 1. Try reading `${CLAUDE_PLUGIN_DATA}/travel-profile.json`
-2. If not found, check Claude's memory for travel profile facts
+2. If not found, check Claude's auto-memory for travel profile facts (look for `travel_profile.md` or `travel-profile` in MEMORY.md)
+3. If not found, scan Claude's existing memories for any travel-relevant facts from other conversations
 
-If a profile exists, ask the user if they want to update it or start fresh.
+If a profile exists, show the user what you already have and ask if they want to update it, fill in gaps, or start fresh.
 
 ## Quick Mode — When User Asks a Specific Travel Question Without a Profile
 
 If the user is asking a specific travel question (e.g., "find me flights to Sicily") and no profile exists, **DO NOT block them with full onboarding**. Instead:
 1. Ask only the 2-3 questions needed for THIS specific search (e.g., dates, budget, party size, departure airport)
 2. Run the search immediately with those answers
-3. After presenting results, offer full onboarding: "Want me to save your preferences for next time? Run `/travel-setup` to set up your full travel profile."
+3. **Silently save** whatever they told you to the profile (progressive capture)
+4. After presenting results, offer full onboarding: "Want me to save more detailed preferences for future searches? Run `/travel-setup` to set up your full travel profile."
 
-Only run the full onboarding below when the user explicitly asks for it (e.g., `/travel-setup`, "set up my travel preferences") or provides a comprehensive dump of their preferences.
+Only run the full onboarding below when the user explicitly asks for it.
 
 ## Full Onboarding Flow
 
@@ -191,11 +201,40 @@ Save to `${CLAUDE_PLUGIN_DATA}/travel-profile.json`:
 
 Only populate the fields the user actually answered. Leave others as sensible defaults.
 
-### Step 2: Save to Claude's memory
+### Step 2: Save to Claude's auto-memory system
 
-Immediately after writing the file, save the key profile facts to Claude's own memory system. Follow the format specified in the persistent-memory skill. This is CRITICAL for cross-session persistence — especially in Cowork where the file may not survive.
+Immediately after writing the file, you MUST also save the profile to Claude's persistent auto-memory. This is CRITICAL for cross-session persistence — especially in Cowork where the plugin data file may not survive.
 
-Save a memory entry with ALL collected profile data, including:
+**In Claude Code:** Use the **Write tool** to create/overwrite a file named `travel_profile.md` in your project memory directory (the same directory where `MEMORY.md` lives). Use this format:
+
+```markdown
+---
+name: travel-profile
+description: AI Heroes Travel Agent — complete travel preference profile including home airport, companions, loyalty programmes, and accommodation preferences
+type: user
+---
+
+Travel profile for AI Heroes Travel Agent:
+- Name: [full name]
+- Email: [email]
+- Home: [IATA] ([city])
+- Companions: [details]
+- Children: [ages]
+- Transport: [preference]
+- Cabin: [class], seat: [preference]
+- Accommodation: [type], budget £[amount]/night [currency]
+- Amenities: [list]
+- Loyalty: [programme] [tier] #[number], ...
+- Passport: [nationality], expires [date]
+- Prefer: [tags]
+- Avoid: [tags]
+```
+
+Then update `MEMORY.md` to include: `- [Travel Profile](travel_profile.md) — AI Heroes Travel Agent user preferences, loyalty, home airport`
+
+**In Cowork:** Save the same structured data as a memory entry titled "Travel Profile" with type "user".
+
+Include ALL collected profile data:
 - Full name, email, phone
 - Home airport and city
 - Travel companions and children's ages

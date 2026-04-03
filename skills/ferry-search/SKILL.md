@@ -90,9 +90,19 @@ For known ferry platforms and operators, construct deep links:
 - **Jadrolinija:** `[Book this ferry](https://www.jadrolinija.hr/en/ferry-croatia?from=ORIGIN&to=DESTINATION&date=YYYY-MM-DD&adults=N)`
 - **For other operators / fallback:** `[Book on Ferryhopper](https://www.ferryhopper.com/en/ferry-routes/ORIGIN-DESTINATION)` or `[Book on Direct Ferries](https://www.directferries.com/routes/ORIGIN_DESTINATION.htm)`
 
-**Format ALL booking links as proper markdown.** Show "Book this ferry" not "Search on Ferryhopper".
+**Link text MUST name the specific option.** Write "Book DFDS Dover→Calais 14:30 →" NOT "Search on Ferryhopper →" or "Book this ferry". Every link label must include the operator, route, and departure time. Format ALL booking links as proper markdown.
+
+**Children in URLs:** When children are in the party, include child parameters:
+- Ferryhopper: `&children=N`
+- Direct Ferries: `&children=N&childAges=AGE1,AGE2`
+- DFDS: `&children=N`
+- Stena Line: `&children=N`
+- P&O: `&children=N`
+- Brittany Ferries: `&children=N&childAges=AGE1`
 
 **Operator direct vs aggregator:** When an operator's direct booking link is available, prefer it. Use Ferryhopper or Direct Ferries as a fallback or for price comparison. If showing both, label clearly: "Book direct" vs "Compare on Ferryhopper".
+
+**Link verification (optional):** If a browser MCP or agent-browser tool is available, verify that the constructed booking URL loads the correct route before presenting it to the user.
 
 ## Overnight Ferry Handling
 

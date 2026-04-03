@@ -1,6 +1,6 @@
 {
   "name": "ai-heroes-travel-agent",
-  "version": "2.3.0",
+  "version": "2.3.1",
   "description": "Travel agent for Claude Cowork with flights, accommodation, rail/transit planning, loyalty intelligence, price monitoring, document scanning, Gmail booking detection, and Google Calendar integration.",
   "author": {
     "name": "AI Heroes"
