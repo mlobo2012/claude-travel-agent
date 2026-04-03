@@ -1,7 +1,7 @@
 {
   "name": "ai-heroes-travel-agent",
-  "version": "2.2.1",
-  "description": "Plan trips end-to-end with flights, trains, ferries, accommodation, proactive transport recommendations, loyalty intelligence, post-booking price monitoring, and expense tracking.",
+  "version": "2.2.5",
+  "description": "Travel agent for Claude Cowork with flights, accommodation, rail/transit planning, loyalty intelligence, price monitoring, document scanning, Gmail booking detection, and Google Calendar integration.",
   "author": {
     "name": "AI Heroes"
   }

@@ -16,10 +16,6 @@
       "command": "npx",
       "args": ["-y", "@daanrongen/tfl-mcp"]
     },
-    "ferryhopper": {
-      "type": "remote",
-      "url": "https://mcp.ferryhopper.com/mcp"
-    },
     "gmail": {
       "type": "http",
       "url": "https://gmail.mcp.claude.com/mcp"
