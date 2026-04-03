@@ -22,13 +22,11 @@
     },
     "gmail": {
       "type": "http",
-      "url": "https://mcp.google.com/gmail",
-      "description": "Read-only Gmail access for detecting booking confirmations (airline and hotel emails)"
+      "url": "https://gmail.mcp.claude.com/mcp"
     },
     "google-calendar": {
       "type": "http",
-      "url": "https://mcp.google.com/calendar",
-      "description": "Create trip events, flight reminders, and accommodation bookings in Google Calendar"
+      "url": "https://gcal.mcp.claude.com/mcp"
     }
   }
 }

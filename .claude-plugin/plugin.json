@@ -1,35 +1,8 @@
 {
   "name": "ai-heroes-travel-agent",
-  "version": "2.2.0",
-  "description": "Full multi-agent travel system by AI Heroes with deep intelligence features. Plans trips end-to-end: flights, trains, ferries, accommodation, activities. Proactive transport mode selection, reasoning transparency on every recommendation, loyalty programme intelligence, post-booking price re-shopping, document scanning (boarding passes, receipts, hotel bills), expense tracking and reports. Parallel agent search, persistent memory learning, price monitoring, pre-trip reminders, trip packs, Gmail booking detection, Google Calendar integration. Live-verified prices, anti-hallucination guardrails, family-aware policies.",
+  "version": "2.2.1",
+  "description": "Plan trips end-to-end with flights, trains, ferries, accommodation, proactive transport recommendations, loyalty intelligence, post-booking price monitoring, and expense tracking.",
   "author": {
-    "name": "AI Heroes",
-    "url": "https://www.ai-heroes.co"
-  },
-  "homepage": "https://github.com/mlobo2012/claude-travel-agent",
-  "repository": "https://github.com/mlobo2012/claude-travel-agent",
-  "license": "MIT",
-  "keywords": [
-    "travel",
-    "flights",
-    "trains",
-    "ferries",
-    "transport",
-    "accommodation",
-    "airbnb",
-    "booking",
-    "trip-planning",
-    "family-travel",
-    "multi-modal",
-    "price-monitoring",
-    "calendar",
-    "agents",
-    "multi-agent",
-    "loyalty-programmes",
-    "expense-tracking",
-    "document-scanning",
-    "price-reshop",
-    "reasoning-transparency",
-    "ai-heroes"
-  ]
+    "name": "AI Heroes"
+  }
 }
