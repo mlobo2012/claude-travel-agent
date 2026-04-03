@@ -146,40 +146,45 @@ That remains the profile-memory model. Monitoring state is separate and should l
 
 ## How Recurring Monitoring Works
 
-There are four different patterns here, and they are not interchangeable:
+Use it the same way you would use a real travel agent: just say what you want monitored.
 
-- **One-off checks**: ask the plugin to search now. Good for immediate decisions.
-- **`/loop` or manual repeat prompting**: useful for interactive follow-up, but not durable monitoring.
-- **Claude Desktop local scheduled tasks**: the supported recurring runtime for this plugin's monitoring architecture. This is the recommended setup for price watches, booked-item re-shop checks, and trip reminders.
-- **Remote tasks**: useful for remote GitHub work, but not the runtime this plugin uses for monitoring.
+For example:
 
-The supported architecture is:
+> "Watch BA548 LHR-FCO for me. I booked at £335. Alert me if it drops below £280 and tell me whether it's still worth rebooking after fees."
 
-1. Register or update watches during the plugin conversation.
-2. Save them in `.claude/travel-monitor/watchlist.json`.
-3. Append check history to `.claude/travel-monitor/history.json`.
-4. Record sent alerts in `.claude/travel-monitor/alerts.json`.
-5. Run one local scheduled task, usually `ai-heroes-travel-monitor`, to process all active watches.
+> "Track these three Barcelona flight options for the next week and tell me which one is improving."
 
-The plugin does not assume a hidden API for scheduled-task creation. Claude should create or manage the task through `/schedule` or the Scheduled page.
+> "Monitor my Rome trip this week and remind me 24 hours before check-in, plus two days before departure to review airport travel time."
 
-## Scheduling Recommendation
+The Travel Agent then:
 
-For travel monitoring, use a Claude Desktop local scheduled task with the project root as the task's working folder.
+1. saves the watch details in your project
+2. sets up the recurring monitor in Claude Desktop
+3. re-checks the watched items on schedule
+4. only alerts you when something is actually worth acting on
 
-Use one dispatcher task instead of one task per watch. This keeps the setup maintainable and lets the watch store act as the single source of truth.
+The first time you ask for recurring monitoring, Claude may ask you to confirm the scheduled task. After that, the same monitor can keep handling future watches in the background.
 
-If worktree isolation is enabled for the task, the watch store still needs to be reachable. If that is not clearly configured, run the monitoring task **without worktree isolation**.
+### What you need to do
+
+- Ask for monitoring in natural language
+- Approve the scheduled task if Claude asks the first time
+- Keep Claude Desktop open and your machine awake when you want local monitoring to run
+
+### What the plugin handles for you
+
+- keeping one shared watchlist instead of lots of separate tasks
+- storing baseline prices and thresholds
+- checking price changes repeatedly
+- suppressing noisy duplicate alerts
+- focusing alerts on actionable changes, not random fare movement
 
 ## Limitations
 
-- Live prices depend on the MCP servers and provider availability in that session.
+- Live prices still depend on MCP servers and provider availability in that session.
 - Some booking links are best-effort because operators change URL structures.
-- Flexible-date calendar-style price spread depends on Claude actually executing the wider search correctly, it is an intelligence pattern, not a dedicated calendar UI component.
-- Recurring monitoring depends on Claude Desktop local scheduled tasks.
-- The Claude Desktop app must be open and the machine must be awake for local scheduled tasks to run.
-- Remote tasks are not used for plugin-driven monitoring.
-- Worktree isolation may require configuration so `.claude/travel-monitor/` is reachable from the task runtime.
+- Flexible-date price spread is an intelligence workflow, not a dedicated calendar UI.
+- Recurring monitoring works through Claude Desktop scheduled tasks, so the app needs to be open and the machine awake.
 - Cross-session persistence is stronger in Claude Code than in Cowork.
 
 ## Getting the Most Out of This Plugin?
