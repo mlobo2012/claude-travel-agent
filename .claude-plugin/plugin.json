@@ -1,7 +1,7 @@
 {
   "name": "ai-heroes-travel-agent",
-  "version": "2.0.0",
-  "description": "Full multi-agent travel system by AI Heroes. Plans trips end-to-end with parallel agent search, persistent memory learning, price monitoring, pre-trip reminders, trip packs, Gmail booking detection, and Google Calendar integration. Live-verified prices with anti-hallucination guardrails.",
+  "version": "2.1.0",
+  "description": "Full multi-agent travel system by AI Heroes with multi-modal transport intelligence. Plans trips end-to-end: flights, trains, ferries, accommodation (Airbnb & Booking.com), activities. Proactively recommends the best transport mode based on your profile. Parallel agent search, persistent memory learning, price monitoring, pre-trip reminders, trip packs, Gmail booking detection, Google Calendar integration. Live-verified prices, anti-hallucination guardrails, family-aware policies.",
   "author": {
     "name": "AI Heroes",
     "url": "https://www.ai-heroes.co"
@@ -12,10 +12,15 @@
   "keywords": [
     "travel",
     "flights",
+    "trains",
+    "ferries",
+    "transport",
     "accommodation",
     "airbnb",
     "booking",
     "trip-planning",
+    "family-travel",
+    "multi-modal",
     "price-monitoring",
     "calendar",
     "agents",

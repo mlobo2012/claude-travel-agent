@@ -8,6 +8,18 @@
       "command": "npx",
       "args": ["-y", "google-flights-mcp-server"]
     },
+    "public-transport": {
+      "command": "npx",
+      "args": ["-y", "mcp-server-public-transport"]
+    },
+    "tfl": {
+      "command": "npx",
+      "args": ["-y", "@daanrongen/tfl-mcp"]
+    },
+    "ferryhopper": {
+      "type": "remote",
+      "url": "https://mcp.ferryhopper.com/mcp"
+    },
     "gmail": {
       "type": "http",
       "url": "https://mcp.google.com/gmail",
