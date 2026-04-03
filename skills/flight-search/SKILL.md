@@ -61,11 +61,17 @@ For top Google Flights results:
 - Cross-check via web search on Skyscanner or airline direct websites
 - Compare prices — flag discrepancies >5%
 
-### Fallback
+### Fallback and Coverage Gap Detection
 
-If the Google Flights MCP is not connected or returns errors:
-- Use web search to find flights on Google Flights, Skyscanner, or airline websites directly
-- Note that results are from web search, not MCP
+Fall back to web search in ANY of these situations:
+
+1. **MCP error or not connected:** Use web search on Google Flights, Skyscanner, or airline websites directly.
+2. **No direct flights returned:** If the user asked for direct flights and the MCP only returns connecting options, search the web for budget carriers (Ryanair, easyJet, Wizz Air, Vueling, Norwegian) that likely serve the route but are missing from MCP results.
+3. **Only expensive options returned:** If the cheapest MCP result is more than 2x the typical budget fare for that route length in Europe (roughly >£300 per person for a 2-3h flight), run a web search to check for low-cost carriers the MCP may have missed.
+4. **Known MCP blind spots:** Google Flights MCP has incomplete coverage of some budget carriers, especially Ryanair from secondary airports (Stansted, Luton, Beauvais, Ciampino, Charleroi). For any European route, ALWAYS run a supplementary web search for Ryanair and easyJet even if the MCP returned results, then merge any cheaper or more convenient options into the final recommendations.
+5. **Missing obvious carriers:** If the route obviously should include a major carrier (e.g., BA for London-Rome, Iberia for London-Madrid) but that airline is absent from MCP results, search for it specifically.
+
+When presenting web-search results alongside MCP results, note the source: "MCP-verified" vs "web search." Prefer MCP-verified prices when both exist for the same flight, but never suppress a cheaper web-search finding just because the MCP didn't return it.
 
 ## Output Template
 
