@@ -72,7 +72,7 @@ https://www.google.com/travel/flights?q=Flights+from+{ORIGIN}+to+{DEST}+on+{YYYY
 
 | Operator/Platform | URL Template |
 |-------------------|-------------|
-| **Eurostar** | `https://www.eurostar.com/uk-en/train/booking/options?origin={STATION_CODE}&destination={STATION_CODE}&outbound-date={YYYY-MM-DD}&adult={adults}&youth={youth_4_11}&child={child_0_3}` |
+| **Eurostar** | `https://www.eurostar.com/uk-en/train/{origin-city}-to-{dest-city}` — ⚠️ Eurostar has moved to a fully SPA-based booking flow with no deep-link URL support. Use the route page as the landing link (e.g. `eurostar.com/uk-en/train/london-to-paris`) and add: "Select your dates on the Eurostar site — your Club Eurostar number {XXXX} earns points, log in before booking." **Recommend Trainline as the preferred booking link for Eurostar journeys** since Trainline supports full deep links with dates and passengers pre-filled. |
 | **Trainline (UK)** | `https://www.thetrainline.com/book/results?origin={STATION_ID}&destination={STATION_ID}&outwardDate={YYYY-MM-DD}T{HH}%3A00%3A00&outwardDateType=departAfter&journeySearchType=single&passengers%5B%5D={DOB}%7Cadult&temporalDirection=departing` |
 | **Trainline (EU)** | `https://www.trainline.eu/search/{ORIGIN_CITY}/{DEST_CITY}/{YYYY-MM-DD}` |
 | **Deutsche Bahn** | `https://int.bahn.de/en/buchung/fahrplanauskunft?reise.von={ORIGIN}&reise.nach={DEST}&reise.datum={YYYY-MM-DD}&reise.zeit={HH}%3A{MM}&reise.zeitpunktart=ABFAHRT` |
