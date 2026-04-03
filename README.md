@@ -1,6 +1,6 @@
 # AI Heroes Travel Agent
 
-An intelligent travel plugin for Claude Code and Claude Cowork that turns travel planning into an ongoing decision system, not a one-shot search.
+An intelligent travel plugin for Claude Code and Claude Cowork that turns travel planning into an ongoing decision system, while staying honest about what recurring monitoring is actually supported today.
 
 Built by [AI Heroes](https://www.ai-heroes.co).
 
@@ -11,7 +11,7 @@ Built by [AI Heroes](https://www.ai-heroes.co).
 - Flexible date search that can scan windows like "mid-May" and show price spread, not just one date
 - Loyalty-aware planning, including programme tradeoffs, status benefits, and post-booking re-shop logic
 - Gmail, document, and calendar workflows for turning bookings into actions
-- Dispatch-ready reminders and price alerts when Cowork scheduled tasks are enabled
+- Local scheduled-task monitoring for price watches and reminders when Claude Desktop scheduling is enabled
 
 ## What Makes This Different
 
@@ -19,7 +19,7 @@ Most travel tools are good at retrieving options. They are weak at judgment. The
 
 This plugin is built around that intelligence layer. It carries a travel profile, remembers your patterns, applies family and loyalty context, and explains its recommendations. It is designed to reason across constraints at the same time: dates, fare rules, travel time, amenities, child policies, status benefits, and what you have said matters more than price. That is the difference between search and advice.
 
-It also aims to stay useful after the booking moment. The model is not just "find me a flight". It is "run my travel system". That means tracking shortlisted options, turning inbox confirmations into calendar actions, preparing pre-trip reminders, and helping you decide when to act. Where Claude and Cowork support background automation, the plugin can plug into that. Where they do not, the README below says so plainly.
+It also stays useful after the booking moment. The model is not just "find me a flight". It is "run my travel system". That means tracking shortlisted options, turning inbox confirmations into calendar actions, preparing pre-trip reminders, and helping you decide when to act. The recurring monitoring architecture in this repo is grounded in Claude Desktop local scheduled tasks, not speculative hidden APIs.
 
 ## Setup
 
@@ -70,19 +70,23 @@ Onboarding is optional. The plugin can build a profile progressively from normal
 
 If you want the explicit setup flow, run `/travel-setup`.
 
-### Dispatch Setup
+### Supported Live Monitoring Architecture
 
-Dispatch is Claude Code and Cowork's notification mechanism for proactive messages that arrive without you manually re-prompting in the moment. In practice, this plugin uses Dispatch for price alerts, pre-trip reminders, packing nudges, and weekly price summaries when the surrounding Claude product supports scheduled execution.
+This plugin supports robust recurring monitoring through **Claude Desktop local scheduled tasks**.
 
-To enable it in Cowork or the Claude app, turn on Dispatch in Claude settings for the app you are using.
+- Watch registration can happen inside the plugin conversation.
+- The plugin stores watches in a local project state store under `.claude/travel-monitor/`.
+- Recurring checks run through **one** local scheduled task on the user's machine, typically named `ai-heroes-travel-monitor`.
+- That task should be created or managed through Claude's supported scheduling flows such as `/schedule` or the Scheduled sidebar.
+- Remote tasks are not used for plugin-based monitoring because the official remote runtime docs describe a GitHub-backed remote environment, while the Cowork scheduled-task docs explicitly describe local scheduled tasks with access to installed plugins.
 
-Example Dispatch alert:
+Example alert:
 
 ```text
-Price Alert: BA LHR→FCO
-Current: £298 (was £335)
-Net saving after cancellation fee: £22
-Action: Rebook before 18 April to lock in the lower fare
+Price Alert: BA LHR->FCO
+Current: GBP 270 (was GBP 335)
+Net saving after fees: GBP 20
+Action: Rebook before the cancellation window closes
 ```
 
 ## Use Cases
@@ -91,85 +95,96 @@ Action: Rebook before 18 April to lock in the lower fare
 
 > "I'm flexible around mid-May, 5-7 nights. What are the best-value dates to fly London to Sicily without red-eye flights or departures before 7am? Show me the price spread across the month so I can pick."
 
-The plugin treats this as a flexible-date planning problem, not a single-date search. It searches across the full mid-May window, removes unsociable departures, compares the valid combinations, and presents a price spread so you can see the cheap pockets of the month at a glance before committing to exact dates.
+The plugin treats this as a flexible-date planning problem, not a single-date search. It searches across the full mid-May window, removes unsociable departures, compares the valid combinations, and presents a price spread so you can see the cheap pockets of the month before committing to exact dates.
 
-> "We're going to Lake Como in June. My wife is vegetarian, our toddler needs a cot, and we want somewhere with a washing machine for a week. Find Airbnbs near Varenna under €150/night with those filters applied."
+> "We're going to Lake Como in June. My wife is vegetarian, our toddler needs a cot, and we want somewhere with a washing machine for a week. Find Airbnbs near Varenna under EUR 150/night with those filters applied."
 
-This is where the plugin acts like an actual selector. It applies all the constraints together, family setup, cot requirement, washing machine, budget cap, location, and trip length, then explains why each shortlisted property survived the filter and what compromises remain. That is materially different from handing back generic listings.
+This is where the plugin acts like an actual selector. It applies all the constraints together, family setup, cot requirement, washing machine, budget cap, location, and trip length, then explains why each shortlisted property survived the filter and what compromises remain.
 
 > "Compare flying vs taking the train from London to Amsterdam next Friday. Factor in that I have Eurostar loyalty, my toddler rides free on trains, and I care more about total door-to-door time than the ticket price."
 
-Instead of comparing headline fares, the plugin reasons across the trip. It accounts for airport transfer and check-in friction, city-centre arrival on Eurostar, toddler fare treatment, and your existing loyalty position, then gives a verdict based on your stated objective, door-to-door time over raw ticket price.
+Instead of comparing headline fares, the plugin reasons across the trip. It accounts for airport transfer and check-in friction, city-centre arrival on Eurostar, toddler fare treatment, and your existing loyalty position, then gives a verdict based on your stated objective.
 
 ### Price Intelligence
 
-> "Watch BA548 LHR-FCO for me. I booked at £335 but prices were dropping. Alert me via Dispatch if it falls below £280, and factor in BA's cancellation fee so I know the actual net saving."
+> "Watch BA548 LHR-FCO for me. I booked at GBP 335 but prices were dropping. Alert me if it falls below GBP 280, and factor in BA's cancellation fee so I know the actual net saving."
 
-The important part is not the number drop, it is whether the drop is actionable. The plugin stores the booked baseline, compares later prices against your threshold, and frames the alert as net value after cancellation or change-cost friction. That turns a noisy fare movement into a decision.
+The important part is not the number drop, it is whether the drop is actionable. The plugin saves the booked baseline to the local watch store, compares later prices against your threshold, and frames the alert as net value after cancellation or change-cost friction. When the local scheduled task is enabled, the recurring check runs through that task.
 
 > "I've been watching three shortlisted flights for Barcelona in late June. Give me a summary of how the prices have moved this week and tell me which one is heading in the right direction."
 
-This is summary judgment, not scraping. The plugin gathers the tracked items, reports their movement direction, and explains which candidate is improving, deteriorating, or holding steady so you can decide whether to buy now or keep waiting.
+This is summary judgment, not scraping. The plugin gathers the tracked items from the local watch store, reports their movement direction, and explains which candidate is improving, deteriorating, or holding steady so you can decide whether to buy now or keep waiting.
 
 ### Booking & Calendar
 
 > "I just forwarded you my Eurostar booking confirmation from my inbox. Add it to my calendar including travel time from my home to St Pancras, and remind me 3 days before to check whether I need to print my tickets."
 
-The plugin can parse the booking details, create the actual travel event, and also create a separate "travel to station" block using home-location context and default or TfL-derived journey time. It then prepares the reminder workflow so the booking becomes operational, not just stored.
+The plugin can parse the booking details, create the actual travel event, and also create a separate "travel to station" block using home-location context and default or TfL-derived journey time. It then saves the reminder requirement into the local watch store so it can be handled by the dispatcher task when scheduling is enabled.
 
 > "I booked the Marriott Venice. My Bonvoy Platinum status should get me something, what upgrade or benefit should I ask for at check-in, and is there a better Marriott property in Venice where Platinum carries more weight?"
 
-This is the loyalty-intelligence layer. The plugin looks at status entitlements for the booked brand and compares nearby alternatives where the same status might convert into more meaningful value. That gives you a practical recommendation on whether to keep the booking and what to ask for.
+This is the loyalty-intelligence layer. The plugin looks at status entitlements for the booked brand and compares nearby alternatives where the same status might convert into more meaningful value.
 
 ### The Live Travel System
 
-> "Set up my travel system for the summer. I've shortlisted 4 flights and 3 Airbnbs. Watch them all, send me a Dispatch alert if anything drops more than 10%, give me a weekly summary on Sunday morning, and remind me 48 hours before any booking window closes."
+> "Set up my travel system for the summer. I've shortlisted 4 flights and 3 Airbnbs. Watch them all, send me an alert if anything drops more than 10%, give me a weekly summary on Sunday morning, and remind me 48 hours before any booking window closes."
 
-This prompt turns the plugin from a finder into a travel operations layer. It records the watched items, thresholds, and reminder rules, then maps them onto whatever scheduled execution Claude currently supports. In Cowork with scheduled tasks configured, that can become a real recurring workflow. In plain Claude Code, it is not a native always-on daemon, and the limitation is documented below.
-
-> "I've got a flight to Rome next week. Sort out everything I need before I go: packing list for 5 nights in May, check the weather, remind me to check in 24h before, and give me the TfL journey to Heathrow."
-
-The plugin breaks this into coordinated prep work: weather-aware packing guidance, check-in reminder logic, and ground transport planning from the user's saved home context. The point is that these tasks are connected, so the answer should feel like one travel system doing the thinking.
+This prompt turns the plugin from a finder into a travel operations layer. It records the watched items, thresholds, and reminder rules in `.claude/travel-monitor/`, then routes recurring execution through one Claude Desktop local scheduled task. It is not a magic always-on daemon everywhere. It becomes robust when the user enables that local scheduled task.
 
 ## Flexible Date Search
 
-When you ask for a vague date window like "mid-May" or "the first two weeks of June", the plugin should interpret that as a multi-date search across the requested span instead of forcing a single departure date. It can then apply additional filters such as no red-eyes, no departures before 7am, preferred trip length, or direct flights only, and present the resulting price spread so you can choose the best-value window.
+When you ask for a vague date window like "mid-May" or "the first two weeks of June", the plugin should interpret that as a multi-date search across the requested span instead of forcing a single departure date. It can then apply additional filters such as no red-eyes, no departures before 7am, preferred trip length, or direct flights only, and present the resulting price spread.
 
 ## How Persistence Works
 
 The plugin uses a dual-storage pattern in Claude Code:
 
-- Primary: `${CLAUDE_PLUGIN_DATA}` files such as `travel-profile.json` and watched-item files
+- Primary: `${CLAUDE_PLUGIN_DATA}` files such as `travel-profile.json`
 - Backup: Claude memory summaries when useful as a fallback
 
-That is reliable enough for repeated use in Claude Code when the same plugin environment is available. In Cowork, file persistence is less dependable and should not be treated as a long-term database. The practical rule is simple: same environment and same project context tend to work best.
+That remains the profile-memory model. Monitoring state is separate and should live in `.claude/travel-monitor/` so the local scheduled task and the conversation share the same watch store.
 
-## Scheduled Tasks And Live Monitoring
+## How Recurring Monitoring Works
 
-The live travel system concept is real: the plugin is designed to support price watches, recurring summaries, and pre-trip reminders so travel help continues after the initial chat.
+There are four different patterns here, and they are not interchangeable:
 
-The current platform reality is narrower than the ambition:
+- **One-off checks**: ask the plugin to search now. Good for immediate decisions.
+- **`/loop` or manual repeat prompting**: useful for interactive follow-up, but not durable monitoring.
+- **Claude Desktop local scheduled tasks**: the supported recurring runtime for this plugin's monitoring architecture. This is the recommended setup for price watches, booked-item re-shop checks, and trip reminders.
+- **Remote tasks**: useful for remote GitHub work, but not the runtime this plugin uses for monitoring.
 
-- Cowork has native scheduled tasks and Dispatch, and Anthropic's help docs say they are created via `/schedule` or the Scheduled sidebar.
-- Those Cowork tasks only run while the Claude desktop app is open and the computer is awake.
-- Claude Code plugin skills do not create an operating-system cron job by themselves.
-- This repo does not currently ship a separate background worker or cron installer.
-- In this session, the requested CLI validation run could not complete because the Claude CLI returned `You've hit your limit · resets 6pm (Europe/London)` before producing a runtime answer.
+The supported architecture is:
 
-So the honest current state is: scheduled monitoring is a Cowork workflow when scheduled tasks are enabled there. It is not a guaranteed always-on background service from the plugin alone, and in plain Claude Code you should assume you may need to re-prompt or explicitly set up Cowork scheduling rather than expecting a native twice-daily daemon.
+1. Register or update watches during the plugin conversation.
+2. Save them in `.claude/travel-monitor/watchlist.json`.
+3. Append check history to `.claude/travel-monitor/history.json`.
+4. Record sent alerts in `.claude/travel-monitor/alerts.json`.
+5. Run one local scheduled task, usually `ai-heroes-travel-monitor`, to process all active watches.
 
-## Known Limitations
+The plugin does not assume a hidden API for scheduled-task creation. Claude should create or manage the task through `/schedule` or the Scheduled page.
+
+## Scheduling Recommendation
+
+For travel monitoring, use a Claude Desktop local scheduled task with the project root as the task's working folder.
+
+Use one dispatcher task instead of one task per watch. This keeps the setup maintainable and lets the watch store act as the single source of truth.
+
+If worktree isolation is enabled for the task, the watch store still needs to be reachable. If that is not clearly configured, run the monitoring task **without worktree isolation**.
+
+## Limitations
 
 - Live prices depend on the MCP servers and provider availability in that session.
 - Some booking links are best-effort because operators change URL structures.
 - Flexible-date calendar-style price spread depends on Claude actually executing the wider search correctly, it is an intelligence pattern, not a dedicated calendar UI component.
-- Dispatch and recurring monitoring depend on product support around the plugin, especially Cowork scheduled tasks.
-- Cowork scheduled tasks are not equivalent to an external always-on cron service.
+- Recurring monitoring depends on Claude Desktop local scheduled tasks.
+- The Claude Desktop app must be open and the machine must be awake for local scheduled tasks to run.
+- Remote tasks are not used for plugin-driven monitoring.
+- Worktree isolation may require configuration so `.claude/travel-monitor/` is reachable from the task runtime.
 - Cross-session persistence is stronger in Claude Code than in Cowork.
 
 ## Getting the Most Out of This Plugin?
 
-If you need help with setup, want it customised to your travel workflow, or just want to talk through what's possible, reach out to [AI Heroes](https://www.ai-heroes.co/contact). We're building these tools to be as valuable as possible and your input drives that.
+If you need help with setup, want it customised to your firm's workflows, or just want to talk through what's possible, reach out to [AI Heroes](https://www.ai-heroes.co/contact). We're building these tools to be as valuable as possible and your input drives that.
 
 ## License
 
@@ -177,6 +192,7 @@ If you need help with setup, want it customised to your travel workflow, or just
 
 ## Version History
 
+- `2.6.0` (2026-04-03): local scheduled-task monitoring architecture, project-local watch store, single-dispatcher pattern, README alignment
 - `2.5.0` (2026-04-03): README rewrite, Dispatch/setup clarification, scheduled-task honesty, calendar travel-time logic, Commons Clause Apache license
 - `2.4.1` (2026-04-03): booking links, persistence architecture, cleaner README
 - `2.3.1` (2026-03-28): persistence fixes and richer onboarding

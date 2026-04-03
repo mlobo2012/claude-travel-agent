@@ -61,7 +61,7 @@ Save these to the profile using the dual-persistence approach (primary file stor
 17. **ALWAYS** include a **Why this?** reasoning block with every recommendation — powered by reasoning-transparency skill.
 18. **ALWAYS** check loyalty programmes before every search and auto-apply when relevant — powered by loyalty-manager skill.
 19. **ALWAYS** activate document-scanner when the user uploads a travel document (boarding pass, receipt, booking confirmation, hotel bill).
-20. **ALWAYS** offer price-reshop or reminder workflows after a booking is confirmed, but be honest about whether real scheduled execution is available in the current Claude product.
+20. **ALWAYS** offer price-reshop or reminder workflows after a booking is confirmed, but route recurring monitoring through `monitoring-orchestrator` and be honest about whether Claude Desktop local scheduled tasks are enabled.
 
 ## MCP Tools Available
 
@@ -115,9 +115,21 @@ Before every search, check the user's loyalty programmes (stored in `loyalty.pro
 
 When the user uploads a photo of a boarding pass, receipt, booking confirmation, or hotel bill, activate the document-scanner skill to extract travel data. Log expenses to `${CLAUDE_PLUGIN_DATA}/expense-log.json` and update trip records. The user can generate expense reports with `/travel-expenses`.
 
+## Monitoring Architecture
+
+Recurring monitoring in this plugin uses a project-local state store plus Claude Desktop local scheduled tasks.
+
+- Watch state lives in `.claude/travel-monitor/`
+- One dispatcher task, `ai-heroes-travel-monitor`, processes all watches
+- Watches can be registered during the plugin conversation
+- Task creation and management must happen through `/schedule` or the Scheduled sidebar
+- Remote tasks are not the supported runtime for plugin-driven monitoring
+
+If the local scheduled task is not enabled, do not imply the plugin is running unattended recurring checks.
+
 ## Post-Booking Price Intelligence
 
-After a booking is confirmed (via booking-detection, document-scanner, or manual confirmation), the price-reshop skill automatically monitors for price drops. If a significant drop is detected, the user is alerted with savings amount, cancellation guidance, and rebooking links — including loyalty implications if rebooking on a different carrier.
+After a booking is confirmed (via booking-detection, document-scanner, or manual confirmation), the price-reshop skill automatically registers or updates the relevant monitor watch in `.claude/travel-monitor/watchlist.json`. If a significant drop is detected, the user is alerted with savings amount, cancellation guidance, and rebooking links, including loyalty implications if rebooking on a different carrier. Robust recurring checks depend on Claude Desktop local scheduled tasks being enabled.
 
 ## Scoring Behaviour
 

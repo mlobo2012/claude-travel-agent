@@ -8,6 +8,15 @@ user-invocable: false
 
 This skill governs how the AI Heroes Travel Agent persists travel data across sessions. It uses a **dual-persistence** strategy with a clear primary/backup architecture.
 
+## Separate Rule For Monitoring State
+
+Travel profile memory and monitoring state are different concerns.
+
+- Travel profile and general preference memory can still use the existing profile persistence model.
+- Recurring monitoring state must live in the project-local store `.claude/travel-monitor/` so the plugin conversation and the Claude Desktop local scheduled task can read the same files.
+- Do not store the authoritative monitoring watchlist in `${CLAUDE_PLUGIN_DATA}`.
+- Do not treat remote or session-local environments as the durable store for monitoring.
+
 ## Persistence Architecture
 
 ### Primary Store: Same-Project File Storage (Option A)

@@ -1,24 +1,24 @@
 ---
 name: price-monitor
-description: "Price monitoring for flights and accommodation. Records watchlists, prepares Dispatch alerts, and supports Cowork scheduled-task workflows. Use when: user says 'watch this', 'monitor the price', 'alert me if price drops', or expresses interest without booking."
+description: "Price monitoring for flights, hotels, and trains using the local watch store plus one Claude Desktop scheduled dispatcher task. Use when: user says 'watch this', 'monitor the price', 'alert me if price drops', or expresses interest without booking."
 argument-hint: "[flight or listing reference]"
 ---
 
 # Price Monitor
 
-Track flights and accommodation, store the baseline, and prepare actionable price-change alerts.
+Track a candidate before booking, save it to the canonical watch store, and route recurring checks through the monitoring-orchestrator skill.
 
-## Current Reality
+## Use The Canonical Monitoring Model
 
-Be explicit about the current platform state.
+Always follow `monitoring-orchestrator` for:
 
-- Claude Cowork has native scheduled tasks and Dispatch.
-- Anthropic's public help docs describe those tasks as being created via `/schedule` or the Scheduled sidebar.
-- Claude Code plugin skills do not create a system cron job or background daemon by themselves.
-- This plugin can define the monitoring workflow, persist the watched item, and provide the prompt or structure for a recurring check.
-- If scheduled execution is not available in the current environment, tell the user plainly that they may need to re-prompt later or set up Cowork scheduling manually.
+- the local state files in `.claude/travel-monitor/`
+- the single dispatcher task `ai-heroes-travel-monitor`
+- scheduled-task creation via `/schedule` or the Scheduled sidebar
+- actionable alert logic based on net savings or explicit thresholds
+- duplicate-alert suppression through `alerts.json`
 
-Do not claim that a real twice-daily background task now exists unless the current Claude product confirms it.
+Never create one scheduled task per watched item.
 
 ## When to Activate
 
@@ -27,24 +27,38 @@ Do not claim that a real twice-daily background task now exists unless the curre
 - User says "alert me if the price changes"
 - User explicitly runs `/price-monitor`
 
-## Setting Up A Price Watch
+## Registering A Watch
 
-### Step 1: Capture Baseline
+### Step 1: Capture The Baseline
 
-Record the current state of the item being watched.
+Save the travel item in canonical watch form. Use `kind` values `flight`, `hotel`, or `train`.
 
-**For flights:**
+Required fields:
+
+- `id`
+- `kind`
+- `provider`
+- `route_or_property`
+- `search_params`
+- `baseline_price`
+- `currency`
+- `threshold_type`
+- `threshold_value`
+- `fee_model`
+- `cadence`
+- `last_checked_at`
+- `last_alerted_at`
+- `expiry_at`
+- `status`
+
+Example:
+
 ```json
 {
-  "type": "flight",
-  "airline": "easyJet",
-  "route": "LGW → CTA",
-  "departure_date": "2026-05-15",
-  "return_date": "2026-05-20",
-  "passengers": 4,
-  "baseline_price_pp": 127.43,
-  "baseline_total": 509.72,
-  "currency": "GBP",
+  "id": "watch_easyjet_lgw_cta_20260515",
+  "kind": "flight",
+  "provider": "easyJet",
+  "route_or_property": "LGW -> CTA 2026-05-15 / 2026-05-20",
   "search_params": {
     "origin": "LGW",
     "destination": "CTA",
@@ -54,122 +68,83 @@ Record the current state of the item being watched.
     "non_stop": true,
     "currency": "GBP"
   },
-  "created_at": "2026-04-03T09:00:00Z",
-  "last_checked": null,
-  "last_price": null,
-  "status": "active"
-}
-```
-
-**For accommodation:**
-```json
-{
-  "type": "accommodation",
-  "listing_name": "Beachfront Villa in Punta Secca",
-  "platform": "airbnb",
-  "destination": "Punta Secca, Sicily",
-  "check_in": "2026-05-15",
-  "check_out": "2026-05-20",
-  "guests": 4,
-  "baseline_price_night": 85.00,
-  "baseline_total": 425.00,
+  "baseline_price": 509.72,
   "currency": "GBP",
-  "search_params": {
-    "location": "Punta Secca, Sicily",
-    "checkin": "2026-05-15",
-    "checkout": "2026-05-20",
-    "guests": 4,
-    "ignoreRobotsText": true
+  "threshold_type": "price_below",
+  "threshold_value": 480.0,
+  "fee_model": {
+    "type": "none",
+    "amount": 0
   },
-  "booking_url": "https://...",
-  "created_at": "2026-04-03T09:00:00Z",
-  "last_checked": null,
-  "last_price": null,
+  "cadence": "daily",
+  "last_checked_at": null,
+  "last_alerted_at": null,
+  "expiry_at": "2026-05-15T06:30:00Z",
   "status": "active"
 }
 ```
 
-### Step 2: Save The Watch Item
+### Step 2: Save It To The Local Watch Store
 
-Save the watch item to `${CLAUDE_PLUGIN_DATA}/travel_watched_items.json`. Claude memory can be used as a secondary backup if useful.
+Write the watch into `.claude/travel-monitor/watchlist.json`.
 
-### Step 3: Decide Whether Scheduled Execution Is Actually Available
+Also ensure `.claude/travel-monitor/history.json` and `.claude/travel-monitor/alerts.json` exist so the dispatcher has somewhere to append results.
 
-If you are in Cowork and scheduled tasks are available:
-- Tell the user this can be turned into a real recurring check.
-- Instruct them to use `/schedule` or the Scheduled sidebar if Claude has not already confirmed task creation in the product UI.
-- Prepare the recurring prompt and cadence for that task.
+### Step 3: Reuse Or Create The Dispatcher
 
-If you are in Claude Code or another environment without confirmed scheduling:
-- Say that the watch has been recorded, but the recurring check is not a guaranteed background process.
-- Offer a saved monitoring prompt the user can rerun.
-- Do not imply that the plugin will wake itself up twice daily.
+If `ai-heroes-travel-monitor` already exists, do not create another task.
+
+If it does not exist and the user wants robust recurring monitoring in Claude Desktop:
+
+- instruct Claude to create it through `/schedule` or the Scheduled page
+- set the task working folder to the project root
+- keep all watches behind that one dispatcher
+
+If Claude Desktop scheduling is not available in the current environment:
+
+- still save the watch locally
+- tell the user the recurring runtime is not active yet
+- offer to re-check manually or help them create the local scheduled task later
 
 ### Step 4: Confirm To The User
 
 If scheduling is confirmed:
 
 ```text
-Watching this for you. I have the baseline saved, and this can run on a twice-daily Cowork schedule.
+Watching this for you. I've saved it to the local watch store and routed it through the ai-heroes-travel-monitor dispatcher task.
 
 Tracked item:
 - [Item description], baseline: [price] as of [date/time]
 
-You will get a Dispatch alert if the threshold is hit.
+You will get an alert when the threshold is actually hit under the saved rules.
 ```
 
 If scheduling is not confirmed:
 
 ```text
-I have saved this to your watchlist with the current baseline.
+I have saved this to the local watch store with the current baseline.
 
 Tracked item:
 - [Item description], baseline: [price] as of [date/time]
 
-I cannot honestly claim there is a native twice-daily background check running from this Claude Code plugin alone. If you want true recurring checks, set this up in Cowork scheduled tasks or ask me to re-check later.
+Robust recurring monitoring requires a Claude Desktop local scheduled task. I have not assumed a hidden background runtime.
 ```
 
-## Recurring Check Workflow
+## Alert Logic
 
-When a recurring check does run, the logic is:
+Alert on actionable movement, not every raw change.
 
-1. Load `${CLAUDE_PLUGIN_DATA}/travel_watched_items.json`.
-2. Re-query the live tools using the stored `search_params`.
-3. Compare the current price to the baseline and latest observed price.
-4. Update the stored watch item.
-5. Send a Dispatch alert only when the movement is meaningful.
+- `price_below`: current price is at or below the target
+- `pct_drop`: percentage drop meets threshold and is still meaningful
+- `net_savings_at_least`: gross movement minus fees meets the threshold
 
-## Alert Thresholds
+Use `alerts.json` to suppress duplicates and apply cooldowns.
 
-| Change | Action |
-|--------|--------|
-| Price drops >10% | Send price-drop alert via Dispatch |
-| Price drops >25% | Send major price-drop alert via Dispatch |
-| Price rises >20% | Send price-increase warning |
-| Price unchanged within 5% | No alert |
-| Item unavailable | Send availability warning |
+## Pause, Resume, Cancel
 
-## Dispatch Alert Template
+When the user changes monitoring state, update the matching watch in `watchlist.json`:
 
-```text
-Price Alert: [Item name]
-Current: [current price] (was [baseline price])
-Change: [percentage and amount]
-Action: [book, rebook, or keep watching]
-```
-
-When fees or cancellation rules are relevant, include the net saving, not just the gross drop.
-
-## Stopping A Watch
-
-When the user says "stop watching" or "cancel price watch":
-
-1. Load the watched items.
-2. Ask which one to cancel if multiple are active.
-3. Mark the selected item as `cancelled`.
-4. If a Cowork scheduled task was explicitly created and identified, remove that task there as well.
-5. Confirm what remains active.
-
-## Listing Active Watches
-
-When the user asks what is being watched, show each active item with baseline, latest observed price, and last-check time if known.
+- `paused`
+- `active`
+- `cancelled`
+- `expired`

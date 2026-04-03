@@ -1,19 +1,19 @@
 ---
 name: trip-reminders
-description: "Pre-trip reminders and Dispatch-ready travel nudges. Supports Cowork scheduled-task workflows for T-14, T-7, T-3, and T-1 reminders when scheduling is available. Use when: a trip is booked or the user says 'remind me before my trip'."
+description: "Pre-trip reminders routed through the local watch store and Claude Desktop local scheduled tasks. Use when: a trip is booked or the user says 'remind me before my trip'."
 user-invocable: false
 ---
 
 # Pre-Trip Reminders
 
-Prepare reminder content for booked trips and use Dispatch when the surrounding Claude product supports scheduled execution.
+Pre-trip reminders use the same monitoring architecture as price watches.
 
-## Current Reality
+## Canonical Model
 
-- Cowork supports scheduled tasks and Dispatch.
-- Anthropic's help docs say those tasks are set up through `/schedule` or the Scheduled sidebar.
-- This plugin does not install a separate always-on cron service.
-- In Claude Code, do not promise that pre-trip reminders will fire automatically unless the product explicitly confirms that scheduling exists in the current workflow.
+- save reminder watches in `.claude/travel-monitor/watchlist.json`
+- route recurring delivery through the single task `ai-heroes-travel-monitor`
+- create or manage that task only through `/schedule` or the Scheduled page
+- do not promise reminders are active unless Claude Desktop local scheduling is actually enabled
 
 ## When To Prepare Reminders
 
@@ -21,9 +21,38 @@ Prepare reminder content for booked trips and use Dispatch when the surrounding 
 - When the user says "remind me before my trip" or "set up trip reminders"
 - When a booking is detected via Gmail
 
-## Reminder Schedule
+## Reminder Watch Shape
 
-Use this as the target reminder plan when scheduling is available:
+Represent each reminder as a watch with `threshold_type: reminder`.
+
+```json
+{
+  "id": "reminder_rome_trip_tminus3",
+  "kind": "flight",
+  "provider": "trip-reminders",
+  "route_or_property": "Rome trip 2026-05-15",
+  "search_params": {
+    "trip_id": "rome_2026_05_15",
+    "reminder_type": "t_minus_3"
+  },
+  "baseline_price": 0,
+  "currency": "GBP",
+  "threshold_type": "reminder",
+  "threshold_value": "t_minus_3",
+  "fee_model": {
+    "type": "none",
+    "amount": 0
+  },
+  "cadence": "daily",
+  "last_checked_at": null,
+  "last_alerted_at": null,
+  "expiry_at": "2026-05-15T00:00:00Z",
+  "status": "active",
+  "watch_reason": "trip_reminder"
+}
+```
+
+## Reminder Cadence
 
 - T-14 for longer trips
 - T-7 for standard trips
@@ -40,10 +69,8 @@ All reminders should include, where relevant:
 4. Packing guidance based on trip type and weather
 5. Destination-specific notes such as adapter, currency, or visa reminders
 
-## If Scheduling Is Available
+## Scheduling Rules
 
-Use Cowork scheduled tasks or the product's scheduling surface, then confirm the reminder plan and cadence to the user.
-
-## If Scheduling Is Not Available
-
-Be honest. Save the trip context, explain that the reminder content is prepared, and tell the user that recurring delivery is not guaranteed from the plugin alone.
+- If Claude Desktop local scheduling is enabled, register the reminder watches and route them through `ai-heroes-travel-monitor`.
+- If scheduling is not enabled, still save the reminder watches locally and tell the user recurring delivery is not active yet.
+- Remote tasks are not the runtime for plugin-driven reminders.
