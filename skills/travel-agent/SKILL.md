@@ -46,6 +46,23 @@ Before every search:
 3. Apply the matching sub-profile's preferences
 4. Use default preferences as fallback if no context-specific ones exist
 
+## Persistent Memory Integration
+
+Before ANY travel search or recommendation:
+1. **Check persistent memory first** — recall `travel_profile` and `travel_derived_preferences` from Cowork's persistent memory
+2. If persistent memory has a profile, use it as the primary source
+3. If no persistent memory profile exists, fall back to `${CLAUDE_PLUGIN_DATA}/travel-profile.json`
+4. If neither exists, ask 2-3 quick questions relevant to the current query and offer full onboarding afterwards: "Want me to save your preferences for next time? Run `/travel-setup` for full onboarding."
+
+After every search interaction:
+- If the user **selects** an option → extract positive tags and add to `travel_derived_preferences.prefer` in persistent memory
+- If the user **rejects** an option and gives a reason → extract negative tags and add to `travel_derived_preferences.avoid` in persistent memory
+- **Pattern detection:** if the user rejects 3+ listings for the same reason (e.g., "too noisy", "too far from beach"), automatically add the corresponding avoid tag without asking
+
+After every profile change:
+- Update **both** persistent memory AND `${CLAUDE_PLUGIN_DATA}/travel-profile.json`
+- Persistent memory is the source of truth; the file is a backup
+
 ## Scoring Behaviour
 
 When ranking results, apply this scoring mentally:

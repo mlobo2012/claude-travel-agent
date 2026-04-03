@@ -7,6 +7,16 @@
     "google-flights": {
       "command": "npx",
       "args": ["-y", "google-flights-mcp-server"]
+    },
+    "gmail": {
+      "type": "http",
+      "url": "https://mcp.google.com/gmail",
+      "description": "Read-only Gmail access for detecting booking confirmations (airline and hotel emails)"
+    },
+    "google-calendar": {
+      "type": "http",
+      "url": "https://mcp.google.com/calendar",
+      "description": "Create trip events, flight reminders, and accommodation bookings in Google Calendar"
     }
   }
 }

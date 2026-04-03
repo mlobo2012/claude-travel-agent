@@ -22,7 +22,33 @@ Build a complete end-to-end trip itinerary combining flights, accommodation, and
 
 ## Planning Sequence
 
-Execute these in order. Each step uses live-verified data following the research pipeline.
+When planning a full trip, invoke all three specialist agents simultaneously using Agent Teams for parallel search. This dramatically reduces wait time.
+
+### Parallel Search Phase (Agent Teams)
+
+Launch these three agents simultaneously:
+
+1. **flight-searcher** agent — Search for flights from the user's home airport to the destination, for the specified dates and party size. Apply flight preferences from profile. Pass: origin, destination, dates, passengers, cabin class, direct-only preference.
+
+2. **accommodation-searcher** agent — Search for accommodation at the destination for the trip dates and party size. Apply accommodation preferences from profile. Pass: destination, check-in, check-out, guests, budget, amenity requirements, prefer/avoid tags.
+
+3. **activities-researcher** agent — Research activities, restaurants, day trips, and experiences at the destination. Pass: destination, dates, trip length, traveller count, any stated interests or preferences.
+
+All three agents run in parallel and return their results independently.
+
+### Combining Results
+
+Once all three agents return results:
+
+1. **Flights first** — Present the top 3 flight options sorted by price, with booking links
+2. **Accommodation second** — Present the top 3 accommodation options sorted by preference fit score, with booking links
+3. **Activities third** — Present recommended activities grouped by day, with practical details
+
+Then proceed to Step 4 (Practical Information) as before.
+
+### Fallback: Sequential Search
+
+If Agent Teams are not available in the current environment, fall back to sequential execution:
 
 ### Step 1: Flights
 

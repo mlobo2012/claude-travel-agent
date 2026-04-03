@@ -131,8 +131,39 @@ If the user runs `/travel-profile history`:
 }
 ```
 
+## Persistent Memory Integration
+
+This profile manager now uses Cowork's persistent memory as the primary store:
+
+### Reading Profile
+1. **First:** Check persistent memory for `travel_profile`
+2. **Fallback:** Read `${CLAUDE_PLUGIN_DATA}/travel-profile.json`
+3. **If neither exists:** Prompt for onboarding or quick setup
+
+### Writing Profile
+1. **Always update both:** persistent memory AND the JSON file
+2. Persistent memory is the source of truth
+3. The JSON file is a backup for environments without persistent memory
+
+### Syncing
+If a conflict is detected between persistent memory and the file:
+- Prefer persistent memory (it's more likely to be current)
+- Update the file to match
+- Notify the user: "I noticed your travel profile was out of sync — I've updated it to match your latest preferences."
+
+### Derived Preferences
+The `travel_derived_preferences` key in persistent memory contains learned tags:
+- `prefer`: features the user consistently likes
+- `avoid`: features the user consistently dislikes
+- These are updated automatically by the feedback and search skills
+
+Display derived preferences under "Learned Preferences" when showing the profile.
+
 ## Auto-Read Before Search
 
-**Important:** The travel-agent core skill requires reading the profile before every search. This skill provides the profile schema and location. The profile is always at `${CLAUDE_PLUGIN_DATA}/travel-profile.json`.
+**Important:** The travel-agent core skill requires reading the profile before every search. This skill provides the profile schema and location.
 
-If the profile file doesn't exist when a search is requested, prompt the user to run `/travel-setup` first, or offer to use sensible defaults for this search only.
+**Primary:** Persistent memory key `travel_profile`
+**Secondary:** `${CLAUDE_PLUGIN_DATA}/travel-profile.json`
+
+If neither exists when a search is requested, prompt the user to run `/travel-setup` first, or offer to use sensible defaults for this search only.
