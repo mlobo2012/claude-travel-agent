@@ -61,8 +61,21 @@ Ask these questions **one or two at a time** in a natural conversational flow. D
 → Stores: `cabin_class`, `seat_preference`, preferred airlines
 
 **Q9: Loyalty Programmes**
-"Are you in any airline or hotel loyalty programmes?"
-→ Stores: `loyalty`
+"Are you in any airline, hotel, or rail loyalty programmes? If so, tell me the programme name, your membership number, and your current tier/status. I'll auto-apply these to every search and track your points and tier progress."
+→ Stores: `loyalty.programmes[]` — for each programme, capture:
+  - `name` (e.g., "British Airways Executive Club")
+  - `type` ("airline" | "hotel" | "rail")
+  - `alliance` (e.g., "oneworld", "Star Alliance", "SkyTeam" — for airlines)
+  - `membership_number`
+  - `tier` (e.g., "Gold", "Platinum")
+  - `points_balance` (user-reported, approximate is fine)
+  - `points_currency` (e.g., "Avios", "Hilton Honors Points")
+  - `tier_expiry` (if known)
+  - `auto_apply`: true (default — apply to searches automatically)
+
+If the user mentions flying a specific airline frequently but has no loyalty programme, note it and suggest: "You've mentioned flying BA often — they have an Executive Club programme where you'd earn Avios on every flight. Want me to remind you to sign up?"
+
+After onboarding, remind the user: "You can manage your loyalty programmes anytime with `/loyalty-manager`."
 
 **Q10: Neighbourhood & Vibe**
 "When you're in a new city, what vibe are you after? (central & walkable, quiet residential, beachfront, near nightlife, etc.)"
