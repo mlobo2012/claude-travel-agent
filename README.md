@@ -1,253 +1,185 @@
 # AI Heroes Travel Agent
 
-An intelligent travel plugin for **Claude Code** and **Claude Cowork** that plans trips end-to-end — flights, trains, ferries, accommodation, and activities — with live-verified prices, proactive transport recommendations, loyalty programme intelligence, and reasoning transparency on every suggestion. It learns your preferences over time and applies them to every search.
+An intelligent travel plugin for Claude Code and Claude Cowork that turns travel planning into an ongoing decision system, not a one-shot search.
 
 Built by [AI Heroes](https://www.ai-heroes.co).
 
----
-
 ## Key Features
 
-- **Proactive transport intelligence** — Recommends trains, flights, or ferries based on route analysis, your profile, and trip context. Doesn't default to flights.
-- **Deep booking links** — Every result links directly to the specific option with dates, passengers, and route pre-filled. Covers 15+ airlines, 8+ rail operators, 10+ ferry operators, and major hotel chains.
-- **Reasoning transparency** — Every recommendation includes a "Why this?" block explaining exactly which preferences, past trips, and loyalty factors influenced the choice.
-- **Loyalty programme tracking** — Auto-applies membership numbers, tracks tier progress, flags earning opportunities, and factors loyalty into every tradeoff.
-- **Live-verified prices** — All prices come from live MCP data or web search, timestamped and source-attributed. No rounding, no estimating, no fabricating.
-- **Family-aware** — Knows child fare policies across operators (free on Deutsche Bahn, 30% off Eurostar, full fare on airlines) and includes children in booking links.
-- **Parallel agent search** — Three specialist agents (flights, accommodation, activities) search simultaneously for faster trip planning.
-- **Post-booking price monitoring** — Watches booked items for price drops and alerts with net savings after cancellation fees and loyalty implications.
-- **Document scanning** — Upload boarding passes, receipts, and hotel bills for automatic extraction, expense tracking, and overcharge detection.
-- **Gmail + Calendar integration** — Detects booking confirmations in Gmail and creates calendar events with airport buffer times and packing reminders.
+- Multi-modal trip planning across flights, trains, ferries, accommodation, local transit, and activities
+- Preference-aware recommendations with explicit "Why this?" reasoning on every shortlist
+- Flexible date search that can scan windows like "mid-May" and show price spread, not just one date
+- Loyalty-aware planning, including programme tradeoffs, status benefits, and post-booking re-shop logic
+- Gmail, document, and calendar workflows for turning bookings into actions
+- Dispatch-ready reminders and price alerts when Cowork scheduled tasks are enabled
 
----
+## What Makes This Different
+
+Most travel tools are good at retrieving options. They are weak at judgment. They can show ten flights, twenty Airbnbs, or a generic itinerary, but they usually make you do the hard part yourself: weighing awkward departure times against price, balancing toddler constraints against transport mode, deciding whether loyalty is worth the premium, or figuring out whether a "drop" is actually worth rebooking after fees.
+
+This plugin is built around that intelligence layer. It carries a travel profile, remembers your patterns, applies family and loyalty context, and explains its recommendations. It is designed to reason across constraints at the same time: dates, fare rules, travel time, amenities, child policies, status benefits, and what you have said matters more than price. That is the difference between search and advice.
+
+It also aims to stay useful after the booking moment. The model is not just "find me a flight". It is "run my travel system". That means tracking shortlisted options, turning inbox confirmations into calendar actions, preparing pre-trip reminders, and helping you decide when to act. Where Claude and Cowork support background automation, the plugin can plug into that. Where they do not, the README below says so plainly.
 
 ## Setup
 
-### Requirements
-
-- **Node.js 18+** with `npx` in your PATH (for MCP servers)
-- **Claude Code** or **Claude Cowork**
-
 ### Install
 
-**Claude Code CLI:**
+**Claude Code**
 ```bash
 claude plugin install https://github.com/mlobo2012/claude-travel-agent
 ```
 
-**From a local clone:**
+**Local repo**
 ```bash
 git clone https://github.com/mlobo2012/claude-travel-agent.git
 claude plugin install ./claude-travel-agent
 ```
 
-**Claude Cowork (desktop app):**
-1. Download or clone this repository
-2. Zip the `claude-travel-agent` folder
-3. Open Cowork → Browse Plugins → Personal → click **"+"**
-4. Select the zip file
+**Claude Cowork**
+1. Download or clone the repo.
+2. Zip the plugin contents with `.claude-plugin/`, `skills/`, and `.mcp.json` at the zip root.
+3. Open Cowork, go to Plugins, then upload the zip from the Personal tab.
 
 ### MCP Servers
 
-The plugin ships with five core MCP servers configured in `.mcp.json`. They run via `npx` automatically — no API keys needed.
+The plugin is configured for these connectors in `.mcp.json`:
 
-| Server | What it does |
-|--------|-------------|
-| **Airbnb** | Accommodation search, property details, availability |
-| **Google Flights** | Flight routes, prices, schedules |
-| **Public Transport** | European/international train and bus routes |
-| **TfL** | London transport journey planning |
+- `airbnb` for Airbnb search and listing details
+- `google-flights` for flight search
+- `public-transport` for train and public transport routing
+- `tfl` for London journey planning
+- `gmail` for booking detection
+- `google-calendar` for calendar event creation
 
-Two optional connectors add extra capabilities:
+### Verify
 
-| Connector | What it adds | Setup |
-|-----------|-------------|-------|
-| **Gmail** | Booking confirmation detection | Grant read-only permissions when prompted |
-| **Google Calendar** | Trip events, reminders | Grant read-write permissions when prompted |
+Run:
 
-### Verify Setup
+```bash
+claude plugin validate .
+```
 
-After installing, ask Claude: "What MCP tools are available?" You should see tools from airbnb, google-flights, public-transport, and tfl.
-
----
+Then ask Claude a simple question like: `What travel tools and skills are available?`
 
 ## Getting Started
 
 ### Onboarding
 
-Onboarding is **optional**. The plugin builds your profile organically from conversation — every time you mention your home city, companions, loyalty numbers, or preferences, they're captured silently.
+Onboarding is optional. The plugin can build a profile progressively from normal conversation, home airport, companions, loyalty numbers, transport preferences, accommodation preferences, and recurring constraints.
 
-To do a full profile setup explicitly: `/travel-setup`
+If you want the explicit setup flow, run `/travel-setup`.
 
-This asks about your home airport, travel style, children, accommodation preferences, budget, loyalty programmes, passport details, and more. Everything is saved and applied to future searches.
+### Dispatch Setup
 
-### Quick Start Without Onboarding
+Dispatch is Claude Code and Cowork's notification mechanism for proactive messages that arrive without you manually re-prompting in the moment. In practice, this plugin uses Dispatch for price alerts, pre-trip reminders, packing nudges, and weekly price summaries when the surrounding Claude product supports scheduled execution.
 
-Just ask a travel question:
+To enable it in Cowork or the Claude app, turn on Dispatch in Claude settings for the app you are using.
 
-> Find me flights to Sicily in May for 2 adults
+Example Dispatch alert:
 
-The plugin will ask only the 2-3 missing details it needs, run the search, and silently save what you told it for next time.
+```text
+Price Alert: BA LHR→FCO
+Current: £298 (was £335)
+Net saving after cancellation fee: £22
+Action: Rebook before 18 April to lock in the lower fare
+```
 
----
+## Use Cases
+
+### Planning & Search
+
+> "I'm flexible around mid-May, 5-7 nights. What are the best-value dates to fly London to Sicily without red-eye flights or departures before 7am? Show me the price spread across the month so I can pick."
+
+The plugin treats this as a flexible-date planning problem, not a single-date search. It searches across the full mid-May window, removes unsociable departures, compares the valid combinations, and presents a price spread so you can see the cheap pockets of the month at a glance before committing to exact dates.
+
+> "We're going to Lake Como in June. My wife is vegetarian, our toddler needs a cot, and we want somewhere with a washing machine for a week. Find Airbnbs near Varenna under €150/night with those filters applied."
+
+This is where the plugin acts like an actual selector. It applies all the constraints together, family setup, cot requirement, washing machine, budget cap, location, and trip length, then explains why each shortlisted property survived the filter and what compromises remain. That is materially different from handing back generic listings.
+
+> "Compare flying vs taking the train from London to Amsterdam next Friday. Factor in that I have Eurostar loyalty, my toddler rides free on trains, and I care more about total door-to-door time than the ticket price."
+
+Instead of comparing headline fares, the plugin reasons across the trip. It accounts for airport transfer and check-in friction, city-centre arrival on Eurostar, toddler fare treatment, and your existing loyalty position, then gives a verdict based on your stated objective, door-to-door time over raw ticket price.
+
+### Price Intelligence
+
+> "Watch BA548 LHR-FCO for me. I booked at £335 but prices were dropping. Alert me via Dispatch if it falls below £280, and factor in BA's cancellation fee so I know the actual net saving."
+
+The important part is not the number drop, it is whether the drop is actionable. The plugin stores the booked baseline, compares later prices against your threshold, and frames the alert as net value after cancellation or change-cost friction. That turns a noisy fare movement into a decision.
+
+> "I've been watching three shortlisted flights for Barcelona in late June. Give me a summary of how the prices have moved this week and tell me which one is heading in the right direction."
+
+This is summary judgment, not scraping. The plugin gathers the tracked items, reports their movement direction, and explains which candidate is improving, deteriorating, or holding steady so you can decide whether to buy now or keep waiting.
+
+### Booking & Calendar
+
+> "I just forwarded you my Eurostar booking confirmation from my inbox. Add it to my calendar including travel time from my home to St Pancras, and remind me 3 days before to check whether I need to print my tickets."
+
+The plugin can parse the booking details, create the actual travel event, and also create a separate "travel to station" block using home-location context and default or TfL-derived journey time. It then prepares the reminder workflow so the booking becomes operational, not just stored.
+
+> "I booked the Marriott Venice. My Bonvoy Platinum status should get me something, what upgrade or benefit should I ask for at check-in, and is there a better Marriott property in Venice where Platinum carries more weight?"
+
+This is the loyalty-intelligence layer. The plugin looks at status entitlements for the booked brand and compares nearby alternatives where the same status might convert into more meaningful value. That gives you a practical recommendation on whether to keep the booking and what to ask for.
+
+### The Live Travel System
+
+> "Set up my travel system for the summer. I've shortlisted 4 flights and 3 Airbnbs. Watch them all, send me a Dispatch alert if anything drops more than 10%, give me a weekly summary on Sunday morning, and remind me 48 hours before any booking window closes."
+
+This prompt turns the plugin from a finder into a travel operations layer. It records the watched items, thresholds, and reminder rules, then maps them onto whatever scheduled execution Claude currently supports. In Cowork with scheduled tasks configured, that can become a real recurring workflow. In plain Claude Code, it is not a native always-on daemon, and the limitation is documented below.
+
+> "I've got a flight to Rome next week. Sort out everything I need before I go: packing list for 5 nights in May, check the weather, remind me to check in 24h before, and give me the TfL journey to Heathrow."
+
+The plugin breaks this into coordinated prep work: weather-aware packing guidance, check-in reminder logic, and ground transport planning from the user's saved home context. The point is that these tasks are connected, so the answer should feel like one travel system doing the thinking.
+
+## Flexible Date Search
+
+When you ask for a vague date window like "mid-May" or "the first two weeks of June", the plugin should interpret that as a multi-date search across the requested span instead of forcing a single departure date. It can then apply additional filters such as no red-eyes, no departures before 7am, preferred trip length, or direct flights only, and present the resulting price spread so you can choose the best-value window.
 
 ## How Persistence Works
 
-The plugin uses a **dual-persistence** model:
+The plugin uses a dual-storage pattern in Claude Code:
 
-| Store | Role | Reliability |
-|-------|------|------------|
-| **Project file** (`${CLAUDE_PLUGIN_DATA}/travel-profile.json`) | Primary, authoritative | Reliable within the same Claude Code project |
-| **Claude memory** (markdown summary pushed to Claude's memory system) | Best-effort backup | May persist across projects/environments, but not guaranteed |
+- Primary: `${CLAUDE_PLUGIN_DATA}` files such as `travel-profile.json` and watched-item files
+- Backup: Claude memory summaries when useful as a fallback
 
-**How it works:**
-- Every profile save writes to **both** stores
-- On load, the plugin tries the file first, then Claude's memory, then asks you
-- If Claude's memory has data but the file doesn't, it reconstructs and re-saves the file
+That is reliable enough for repeated use in Claude Code when the same plugin environment is available. In Cowork, file persistence is less dependable and should not be treated as a long-term database. The practical rule is simple: same environment and same project context tend to work best.
 
-**Limitations:**
-- Cross-project persistence depends on Claude's memory system surfacing the data — this is best-effort
-- In Cowork, the file store is session-scoped, so Claude memory is the only persistence path
-- Claude memory stores a markdown summary, not the full JSON — some minor detail may be lost on reconstruction
+## Scheduled Tasks And Live Monitoring
 
----
+The live travel system concept is real: the plugin is designed to support price watches, recurring summaries, and pre-trip reminders so travel help continues after the initial chat.
 
-## Commands
+The current platform reality is narrower than the ambition:
 
-| Command | What it does |
-|---------|-------------|
-| `/travel-setup` | Full profile onboarding (optional — profile builds from conversation too) |
-| `/travel-profile` | View your saved preferences |
-| `/travel-profile update` | Update a specific preference |
-| `/find-flights` | Search flights with live prices and deep booking links |
-| `/find-trains` | Search trains with child fares and operator deep links |
-| `/find-ferries` | Search ferries with cabin options and operator deep links |
-| `/find-accommodation` | Search Airbnb and Booking.com with preference scoring |
-| `/plan-trip` | Full end-to-end trip planning (parallel agents + transport intelligence) |
-| `/loyalty-manager` | View, add, or manage loyalty programmes |
-| `/price-monitor` | Set up pre-booking price watches |
-| `/travel-expenses` | Generate expense report from scanned receipts |
-| `/trip-pack` | Generate a pre-departure trip document |
-| `/feedback` | Record post-trip feedback to improve future results |
-| `/travel-help` | Quick reference for all commands |
+- Cowork has native scheduled tasks and Dispatch, and Anthropic's help docs say they are created via `/schedule` or the Scheduled sidebar.
+- Those Cowork tasks only run while the Claude desktop app is open and the computer is awake.
+- Claude Code plugin skills do not create an operating-system cron job by themselves.
+- This repo does not currently ship a separate background worker or cron installer.
+- In this session, the requested CLI validation run could not complete because the Claude CLI returned `You've hit your limit · resets 6pm (Europe/London)` before producing a runtime answer.
 
----
+So the honest current state is: scheduled monitoring is a Cowork workflow when scheduled tasks are enabled there. It is not a guaranteed always-on background service from the plugin alone, and in plain Claude Code you should assume you may need to re-prompt or explicitly set up Cowork scheduling rather than expecting a native twice-daily daemon.
 
-## Example Prompts
+## Known Limitations
 
-**Family trip planning:**
-> Plan a trip to Paris for me and my two kids (ages 5 and 8). We're in London. Mid-May, 4 nights.
+- Live prices depend on the MCP servers and provider availability in that session.
+- Some booking links are best-effort because operators change URL structures.
+- Flexible-date calendar-style price spread depends on Claude actually executing the wider search correctly, it is an intelligence pattern, not a dedicated calendar UI component.
+- Dispatch and recurring monitoring depend on product support around the plugin, especially Cowork scheduled tasks.
+- Cowork scheduled tasks are not equivalent to an external always-on cron service.
+- Cross-session persistence is stronger in Claude Code than in Cowork.
 
-The plugin recommends Eurostar (kids 30% off, free bags) over flights, finds family-friendly Airbnbs, plans kid-friendly activities, and provides TfL connections from St Pancras.
+## Getting the Most Out of This Plugin?
 
-**Flight search with loyalty:**
-> Find me flights to New York from Heathrow, late June, 2 people
-
-Results include BA with your Executive Club number pre-filled in the booking link, plus alternatives with loyalty tradeoff explained.
-
-**Challenge a recommendation:**
-> Why didn't you suggest the Holiday Inn?
-
-The plugin explains the scoring: "Holiday Inn scored 45 vs Marriott's 72 because (1) no loyalty match, (2) 'basic breakfast' is in your avoid tags from your Birmingham trip, (3) review score 3.8 vs your 4.0 minimum."
-
-**Post-booking monitoring:**
-> I booked that BA flight to NYC for £450
-
-Confirms, logs the booking, and starts automatic price monitoring. If the price drops: "PRICE DROP: BA LHR→JFK dropped to £380. Net savings after cancellation: £70. Your Avios are preserved. [Rebook now]"
-
-**Document scanning:**
-> *Upload a hotel bill photo*
-
-"Your Marriott bill shows £189/night but your booking was £165/night — that's £48 overcharged across 2 nights. Added to your NYC trip expenses (total: £1,247 / £1,500 budget)."
-
----
-
-## Booking Links
-
-Every search result includes a **deep booking link** that takes you directly to the specific option with route, dates, and passengers pre-filled. The plugin never links to a generic homepage.
-
-**Coverage:**
-- **Flights:** Ryanair, easyJet, BA, Wizz Air, Vueling, Lufthansa, KLM, Air France, Iberia, TAP, Aer Lingus, Norwegian, SAS, Turkish Airlines, Emirates, Qatar Airways — plus Google Flights fallback for any other airline
-- **Trains:** Eurostar, Trainline, Deutsche Bahn, SNCF, Omio, Amtrak, Italo, Renfe
-- **Ferries:** DFDS, Stena Line, P&O, Brittany Ferries, Blue Star, Viking Line, Jadrolinija, Irish Ferries, Color Line — plus Ferryhopper/Direct Ferries fallback
-- **Hotels:** Airbnb (with dates + guests), Booking.com, Marriott (with Bonvoy number), Hilton, IHG, Accor
-
-Link text always names the specific option: `Book BA548 LHR→FCO 14 May` — not `Search on Google Flights`.
-
-Loyalty membership numbers are included in booking URLs where the platform supports it. Where it doesn't, the plugin advises logging in before booking.
-
-**Current limitations:**
-- Deep link URL templates are best-effort — airline and operator websites occasionally change their URL structure, which may cause a link to load a search page instead of the exact result. The fallback hierarchy (operator direct → aggregator → search with route pre-filled) handles this gracefully.
-- Some platforms don't support child parameters or loyalty numbers in URLs — the plugin notes this and advises manual entry.
-
----
-
-## How Transport Intelligence Works
-
-Before any transport search, the plugin:
-1. Reads your profile (transport preference, children, budget, loyalty programmes)
-2. Checks the route against 30+ known train-competitive routes
-3. Applies rules: under 4h by train + kids → lead with train; island routes → lead with ferry; cross-channel → always show Eurostar
-4. Checks loyalty implications for each mode
-5. Recommends the best option first with full reasoning
-
----
-
-## Child & Family Quick Reference
-
-| Operator | Free Under | Discount | Luggage |
-|----------|-----------|----------|---------|
-| Eurostar | 4 (on lap) | 4–11: ~30% off | Unlimited free |
-| UK National Rail | 5 | 5–15: 50% off | Unlimited free |
-| Deutsche Bahn | 6 | 6–14: FREE with adult | Unlimited free |
-| SNCF (TGV) | 4 | 4–11: ~30% off | Unlimited free |
-| Amtrak | 2 (on lap) | 2–12: 50% off | 5 free items |
-| Most airlines | 2 (on lap, ~10%) | 2+: full fare | £25–45/bag |
-
----
-
-## Troubleshooting
-
-**MCP servers not starting:** Ensure Node.js 18+ is installed and `npx` is in your PATH. Run `npx @openbnb/mcp-server-airbnb --help` to test.
-
-**"No profile found" on a new session:** The plugin will try the file first, then Claude's memory. If both are empty, it asks you. Profile persistence within the same project is reliable. Cross-project persistence depends on Claude's memory system.
-
-**Booking link loads a generic search page:** Airline/operator websites occasionally change their URL structure. The plugin's fallback hierarchy handles this — if the direct link doesn't work, it falls back to an aggregator link with the route pre-filled.
-
-**Gmail/Calendar not connecting:** These are optional connectors that require permission grants. The core search and planning features work without them.
-
----
-
-## Development
-
-```bash
-# Validate the plugin
-claude plugin validate
-
-# Test locally
-claude --plugin-dir ./claude-travel-agent
-```
-
----
-
-## Version History
-
-| Version | Date | Highlights |
-|---------|------|-----------|
-| **2.4.0** | 2026-04-03 | Dedicated booking-links skill (canonical URL reference for 15+ airlines, 8+ rail, 10+ ferry, 6+ hotel platforms). Explicit primary/backup persistence architecture. Clean README rewrite. |
-| **2.3.1** | 2026-03-28 | Cross-session persistence fix with dual-persistence strategy. Deep booking links for 7+ airlines, trains, ferries, hotels. Enhanced onboarding (seat, personal details, passport). |
-| **2.2.0** | 2026-03-15 | Post-booking price re-shopping. Reasoning transparency ("Why this?"). Loyalty programme intelligence. Document scanner and expense tracking. |
-| **2.1.0** | 2026-03-01 | Multi-modal transport (trains, ferries, local transit). Proactive transport intelligence. Family-aware child fare policies. 30+ route knowledge base. |
-| **2.0.0** | 2026-02-15 | Persistent memory. Parallel agent search. Price monitoring. Pre-trip reminders. Trip packs. Gmail booking detection. Google Calendar integration. |
-
----
+If you need help with setup, want it customised to your travel workflow, or just want to talk through what's possible, reach out to [AI Heroes](https://www.ai-heroes.co/contact). We're building these tools to be as valuable as possible and your input drives that.
 
 ## License
 
-MIT
+[Apache 2.0 + Commons Clause](LICENSE) - free for private and internal business use. Commercial resale is not permitted.
 
----
+## Version History
 
-Built by [AI Heroes](https://www.ai-heroes.co) — AI That Learns How You Win.
-
-Created by Marco Lobo.
+- `2.5.0` (2026-04-03): README rewrite, Dispatch/setup clarification, scheduled-task honesty, calendar travel-time logic, Commons Clause Apache license
+- `2.4.1` (2026-04-03): booking links, persistence architecture, cleaner README
+- `2.3.1` (2026-03-28): persistence fixes and richer onboarding
+- `2.2.0` (2026-03-15): price re-shop, loyalty intelligence, document scanning
+- `2.1.0` (2026-03-01): multi-modal transport, family-aware routing, route intelligence
+- `2.0.0` (2026-02-15): persistent memory, price monitoring, reminders, Gmail and calendar support

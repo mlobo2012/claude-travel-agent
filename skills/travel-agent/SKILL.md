@@ -61,7 +61,7 @@ Save these to the profile using the dual-persistence approach (primary file stor
 17. **ALWAYS** include a **Why this?** reasoning block with every recommendation — powered by reasoning-transparency skill.
 18. **ALWAYS** check loyalty programmes before every search and auto-apply when relevant — powered by loyalty-manager skill.
 19. **ALWAYS** activate document-scanner when the user uploads a travel document (boarding pass, receipt, booking confirmation, hotel bill).
-20. **ALWAYS** set up price-reshop monitoring after any booking is confirmed.
+20. **ALWAYS** offer price-reshop or reminder workflows after a booking is confirmed, but be honest about whether real scheduled execution is available in the current Claude product.
 
 ## MCP Tools Available
 
