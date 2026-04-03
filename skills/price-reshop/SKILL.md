@@ -265,7 +265,7 @@ If the user does not know their cancellation policy, apply these defaults:
 
 ### Step 3: Save to booked-trips.json
 
-Create the item object using the schemas above and append to the `items` array in `${CLAUDE_PLUGIN_DATA}/booked-trips.json`. If the file does not exist, create it with the wrapper schema.
+Create the item object using the schemas above. Use the **Read tool** to load `${CLAUDE_PLUGIN_DATA}/booked-trips.json`, append the item to the `items` array, and use the **Write tool** to save the updated file. If the file does not exist, use the **Write tool** to create it with the wrapper schema.
 
 ### Step 4: Register with Scheduled Task System
 
@@ -273,7 +273,7 @@ The price-reshop system integrates with the SAME scheduled task created by `pric
 
 **If no scheduled task exists yet**, create one with this prompt:
 
-> "Run price check for travel items. First, recall `travel_watched_items` from persistent memory and check pre-booking watches. Then, load `${CLAUDE_PLUGIN_DATA}/booked-trips.json` and check all items with status `monitoring`. For each reshop item, re-query the MCP tools with the saved search_params. Compare the current price to the price_paid. Append the new price to price_history. If a price drop exceeds the user's alert thresholds, send a reshop alert via Dispatch. Update trend_analysis fields."
+> "Run price check for travel items. First, recall `travel_watched_items` from persistent memory and check pre-booking watches. Then, use the Read tool on `${CLAUDE_PLUGIN_DATA}/booked-trips.json` and check all items with status `monitoring`. For each reshop item, re-query the MCP tools with the saved search_params. Compare the current price to the price_paid. Append the new price to price_history. If a price drop exceeds the user's alert thresholds, send a reshop alert via Dispatch. Update trend_analysis fields."
 
 **If the scheduled task already exists** (from price-monitor), update its prompt to include the reshop logic above.
 
@@ -365,7 +365,7 @@ After appending the new price, recalculate:
 
 ### Step 5: Evaluate Alert Thresholds
 
-Load user-specific thresholds from `${CLAUDE_PLUGIN_DATA}/booked-trips.json` (top-level `alert_thresholds`). If no custom thresholds, use defaults.
+Use the **Read tool** to load user-specific thresholds from `${CLAUDE_PLUGIN_DATA}/booked-trips.json` (top-level `alert_thresholds`). If no custom thresholds, use defaults.
 
 **Default thresholds:**
 - Alert if price drops **more than 10%** from `price_paid`
@@ -611,7 +611,7 @@ When a watched item from `price-monitor` is booked:
 
 ### Integration with travel profile
 
-Load the user's profile from `travel_profile` persistent memory or `${CLAUDE_PLUGIN_DATA}/travel-profile.json` to:
+Load the user's profile using the persistent-memory fallback chain: first use the **Read tool** on `${CLAUDE_PLUGIN_DATA}/travel-profile.json`, then fall back to Claude's memory, then ask the user. Use the loaded profile to:
 - Determine default currency for thresholds
 - Check loyalty programme memberships for cross-carrier alerts
 - Know home airport (for re-search parameters)
@@ -746,7 +746,7 @@ Say "set alert threshold [value]" to change your sensitivity.
 
 ## Privacy and Data Handling
 
-- All booking data is stored locally in `${CLAUDE_PLUGIN_DATA}/booked-trips.json` and in Cowork persistent memory
+- All booking data is stored locally in `${CLAUDE_PLUGIN_DATA}/booked-trips.json` (accessed via the **Read tool** and **Write tool**) and in Cowork persistent memory
 - Booking references and personal data never leave the local environment except when querying prices via MCP tools (which only send search parameters, not booking refs)
 - Price history is retained indefinitely for trend analysis but can be purged on request: "clear my reshop history"
 - When a user says "forget my booking", remove the item from `booked-trips.json` AND from `travel_past_trips` if requested

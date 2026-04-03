@@ -6,7 +6,17 @@ argument-hint: "[view|update|history]"
 
 # Travel Profile Manager
 
-Manage the persistent travel preference profile stored at `${CLAUDE_PLUGIN_DATA}/travel-profile.json`.
+Manage the persistent travel preference profile using the dual-persistence approach (file + Claude memory).
+
+## Loading the Profile
+
+**Always use the persistent-memory fallback chain:**
+
+1. **First:** Try reading `${CLAUDE_PLUGIN_DATA}/travel-profile.json` with the Read tool
+2. **Fallback:** If the file doesn't exist or is empty, check Claude's own memory for travel profile facts
+3. **If neither exists:** Tell the user "No travel profile found. Run /travel-setup to create one."
+
+If memory has data but the file doesn't, reconstruct the JSON from memory and re-save it to the file.
 
 ## Commands
 
@@ -14,13 +24,15 @@ Manage the persistent travel preference profile stored at `${CLAUDE_PLUGIN_DATA}
 
 If the user runs `/travel-profile` or `/travel-profile view`:
 
-1. Read `${CLAUDE_PLUGIN_DATA}/travel-profile.json`
-2. If no file exists, tell the user: "No travel profile found. Run /travel-setup to create one."
-3. If file exists, display it in a friendly format:
+1. Load the profile using the fallback chain above
+2. If no profile exists anywhere, suggest: "No travel profile found. Run /travel-setup to create one."
+3. If profile exists, display it in a friendly format:
 
 ```
 ## Your Travel Profile
 
+**Name:** [full name]
+**Email:** [email]
 **Home:** [airport] ([city])
 **Currency:** [currency]
 **Onboarded:** [date]
@@ -55,10 +67,10 @@ If the user runs `/travel-profile` or `/travel-profile view`:
 
 If the user runs `/travel-profile update` or says they want to change a preference:
 
-1. Read the current profile
+1. Load the current profile using the fallback chain
 2. Ask what they want to change
 3. Update only the specified fields
-4. Save back to `${CLAUDE_PLUGIN_DATA}/travel-profile.json`
+4. **Save using dual-persistence:** write to `${CLAUDE_PLUGIN_DATA}/travel-profile.json` AND update Claude's memory
 5. Confirm the change
 
 ### Trip History
@@ -76,19 +88,26 @@ If the user runs `/travel-profile history`:
   "travel": {
     "onboarding_complete": true,
     "onboarding_date": "YYYY-MM-DD",
+    "personal": {
+      "full_name": "string",
+      "email": "string",
+      "phone": "string (optional)"
+    },
     "home_airport": "string (IATA code)",
     "home_city": "string",
     "currency": "string (ISO 4217)",
+    "transport_preference": "speed|budget|comfort|eco|no_preference",
+    "children": [3],
     "default": {
       "cabin_class": "economy|premium_economy|business|first",
-      "seat_preference": "aisle|window|middle|no_preference",
+      "seat_preference": "aisle|window|extra_legroom|no_preference|minimize_cost",
       "hotel_min_stars": 3-5,
       "max_nightly_budget": number,
       "amenities": ["string"],
       "accommodation_type_preference": "airbnb|hotel|either"
     },
     "contexts": {
-      "solo|partner|group|work": {
+      "solo|partner|group|work|family": {
         "accommodation_type_preference": "string",
         "max_nightly_budget": number,
         "neighbourhood_vibe": "string",
@@ -96,74 +115,35 @@ If the user runs `/travel-profile history`:
       }
     },
     "loyalty": {
-      "airlines": [{ "programme": "string", "number": "string" }],
-      "hotels": [{ "programme": "string", "number": "string" }]
+      "programmes": [
+        {
+          "name": "string",
+          "type": "airline|hotel|rail",
+          "alliance": "string",
+          "membership_number": "string",
+          "tier": "string",
+          "points_balance": number,
+          "points_currency": "string",
+          "tier_expiry": "string",
+          "auto_apply": true
+        }
+      ]
     },
     "passport": {
       "nationality": "string",
-      "expiry": "YYYY-MM"
+      "expiry": "YYYY-MM",
+      "number": "string (optional)"
     },
-    "feedback_history": [
-      {
-        "trip_id": "string",
-        "date": "YYYY-MM-DD",
-        "rating": 1-5,
-        "liked": ["string"],
-        "disliked": ["string"],
-        "notes": "string"
-      }
-    ],
+    "feedback_history": [],
     "derived_preferences": {
       "prefer": ["string"],
       "avoid": ["string"]
     },
-    "past_trips": [
-      {
-        "destination": "string",
-        "dates": { "start": "YYYY-MM-DD", "end": "YYYY-MM-DD" },
-        "travellers": number,
-        "context": "string",
-        "status": "planned|completed|cancelled",
-        "created_at": "YYYY-MM-DD"
-      }
-    ]
+    "past_trips": []
   }
 }
 ```
 
-## Persistent Memory Integration
-
-This profile manager now uses Cowork's persistent memory as the primary store:
-
-### Reading Profile
-1. **First:** Check persistent memory for `travel_profile`
-2. **Fallback:** Read `${CLAUDE_PLUGIN_DATA}/travel-profile.json`
-3. **If neither exists:** Prompt for onboarding or quick setup
-
-### Writing Profile
-1. **Always update both:** persistent memory AND the JSON file
-2. Persistent memory is the source of truth
-3. The JSON file is a backup for environments without persistent memory
-
-### Syncing
-If a conflict is detected between persistent memory and the file:
-- Prefer persistent memory (it's more likely to be current)
-- Update the file to match
-- Notify the user: "I noticed your travel profile was out of sync — I've updated it to match your latest preferences."
-
-### Derived Preferences
-The `travel_derived_preferences` key in persistent memory contains learned tags:
-- `prefer`: features the user consistently likes
-- `avoid`: features the user consistently dislikes
-- These are updated automatically by the feedback and search skills
-
-Display derived preferences under "Learned Preferences" when showing the profile.
-
 ## Auto-Read Before Search
 
-**Important:** The travel-agent core skill requires reading the profile before every search. This skill provides the profile schema and location.
-
-**Primary:** Persistent memory key `travel_profile`
-**Secondary:** `${CLAUDE_PLUGIN_DATA}/travel-profile.json`
-
-If neither exists when a search is requested, prompt the user to run `/travel-setup` first, or offer to use sensible defaults for this search only.
+**Important:** The travel-agent core skill requires reading the profile before every search. Always use the persistent-memory fallback chain (file -> memory -> quick setup). Never read only one source.

@@ -10,7 +10,7 @@ Search for ferry routes using live MCP data with full quality verification.
 
 ## Before Searching
 
-1. **Read the user's travel profile** from `${CLAUDE_PLUGIN_DATA}/travel-profile.json`
+1. **Use the Read tool** on `${CLAUDE_PLUGIN_DATA}/travel-profile.json` to load the user's travel profile. Follow the persistent-memory fallback chain: file first, then Claude's memory, then ask the user.
 2. **Check the transport-intelligence knowledge base** for the route — it may have operator info and journey times
 3. **Confirm search parameters** with the user if any are missing:
    - Origin port/island/city (required)
@@ -59,7 +59,7 @@ Present each ferry option in this format:
 **Child fare:** [EXACT CHILD PRICE or "FREE (under X)" or "X% off"]
 **Luggage:** [Policy]
 **Verified:** [HH:MM today] via [Source]
-**Booking:** [DIRECT URL]
+**Book this ferry:** [DEEP BOOKING LINK — see section below]
 
 > [One-sentence note — e.g., "Overnight sailing doubles as accommodation — saves a hotel night"]
 ```

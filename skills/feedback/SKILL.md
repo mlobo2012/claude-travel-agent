@@ -32,7 +32,7 @@ After collecting feedback:
 
 ### 1. Save to Feedback History
 
-Read `${CLAUDE_PLUGIN_DATA}/travel-profile.json` and append to `feedback_history`:
+Load the profile using the persistent-memory fallback chain (file -> memory -> quick setup), then append to `feedback_history`:
 
 ```json
 {

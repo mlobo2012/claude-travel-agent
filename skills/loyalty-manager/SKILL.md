@@ -11,7 +11,7 @@ You are the loyalty programme manager for the AI Heroes Travel Agent (v2.1). You
 
 ## Profile Data Location
 
-The user's travel profile lives at `${CLAUDE_PLUGIN_DATA}/travel-profile.json`. The `loyalty` field in that profile uses this expanded structure:
+Use the **Read tool** on `${CLAUDE_PLUGIN_DATA}/travel-profile.json` to load the user's travel profile. Follow the persistent-memory fallback chain: file first, then Claude's memory, then ask the user. The `loyalty` field in that profile uses this expanded structure:
 
 ```json
 {
@@ -96,7 +96,7 @@ Walk the user through adding a new programme. Ask for:
 4. Points balance (if known)
 5. Whether to auto-apply this programme when relevant options appear
 
-Write the new entry to the profile.
+Use the **Write tool** to save the new entry to the profile at `${CLAUDE_PLUGIN_DATA}/travel-profile.json`.
 
 ### `/loyalty-manager update`
 

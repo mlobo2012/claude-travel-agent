@@ -168,7 +168,7 @@ Determine the currency from these signals (in priority order):
 3. Country of vendor (from address, language, or known chain location)
 4. Active trip destination currency
 
-If the receipt currency differs from the user's home currency (read from `${CLAUDE_PLUGIN_DATA}/travel-profile.json`), add a conversion note using approximate current rates:
+If the receipt currency differs from the user's home currency (load the profile using the persistent-memory fallback chain: try `${CLAUDE_PLUGIN_DATA}/travel-profile.json` first, then Claude's memory), add a conversion note using approximate current rates:
 
 ```
 Note: €87.50 is approximately £74.80 at today's rate (€1 = £0.855).
@@ -208,7 +208,7 @@ Read the receipt image. Extract all visible fields into structured data. If the 
 
 #### Step 3: Log to Expense File
 
-Append the expense to `${CLAUDE_PLUGIN_DATA}/expense-log.json`:
+Use the **Read tool** to load `${CLAUDE_PLUGIN_DATA}/expense-log.json`, then append the expense and use the **Write tool** to save the updated file:
 
 ```json
 {
@@ -550,7 +550,7 @@ Compare against booked rate and flag any discrepancies.
 
 #### Step 3: Log Expenses
 
-Log each non-room-charge line item as an individual expense in `${CLAUDE_PLUGIN_DATA}/expense-log.json`, categorised appropriately. Room charges are logged as a single accommodation expense.
+Use the **Read tool** to load `${CLAUDE_PLUGIN_DATA}/expense-log.json`, then log each non-room-charge line item as an individual expense, categorised appropriately. Room charges are logged as a single accommodation expense. Use the **Write tool** to save the updated file.
 
 #### Step 4: Confirm to User
 
@@ -590,7 +590,7 @@ Triggered by `/travel-expenses [trip-name]` or "generate expense report for [tri
 ### Report Generation Steps
 
 1. Recall `travel_past_trips` from persistent memory to resolve the trip name
-2. Load all expenses for that trip from `${CLAUDE_PLUGIN_DATA}/expense-log.json`
+2. Use the **Read tool** to load all expenses for that trip from `${CLAUDE_PLUGIN_DATA}/expense-log.json`
 3. Group by category
 4. Calculate totals, averages, and budget comparison
 5. Format as markdown
@@ -710,7 +710,7 @@ Triggered by `/travel-expenses [trip-name]` or "generate expense report for [tri
 After generating the report:
 1. Display it in the conversation for immediate review
 2. Offer to save: "Want me to save this as a file you can copy or share?"
-3. If yes, save to `${CLAUDE_PLUGIN_DATA}/reports/expense-report-[trip-name]-[date].md`
+3. If yes, use the **Write tool** to save to `${CLAUDE_PLUGIN_DATA}/reports/expense-report-[trip-name]-[date].md`
 
 ---
 
@@ -814,7 +814,7 @@ Your usual spending breakdown for Barcelona: ...
 
 ## 8. Expense Log Data Structure
 
-The master expense log at `${CLAUDE_PLUGIN_DATA}/expense-log.json`:
+The master expense log lives at `${CLAUDE_PLUGIN_DATA}/expense-log.json`. Always use the **Read tool** to load it and the **Write tool** to save updates:
 
 ```json
 {

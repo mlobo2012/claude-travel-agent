@@ -10,8 +10,8 @@ The proactive brain behind multi-modal transport recommendations. Before any tra
 
 ## Before Any Transport Search
 
-1. **Read the user's travel profile** from `${CLAUDE_PLUGIN_DATA}/travel-profile.json`
-2. **Read Claude's memory** for any travel preferences or past feedback
+1. **Use the Read tool** on `${CLAUDE_PLUGIN_DATA}/travel-profile.json` to load the user's travel profile. Follow the persistent-memory fallback chain: file first, then Claude's memory, then ask the user.
+2. **Also check Claude's memory** for any additional travel preferences or past feedback not in the file
 3. **Detect trip context** from the conversation:
    - Solo / partner / family / group / work
    - Children travelling? What ages?

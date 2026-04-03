@@ -10,8 +10,8 @@ Build a complete end-to-end trip itinerary with proactive multi-modal transport,
 
 ## Before Planning
 
-1. **Read the user's travel profile** from `${CLAUDE_PLUGIN_DATA}/travel-profile.json`
-2. **Read Claude's memory** for any travel preferences or past feedback
+1. **Use the Read tool** on `${CLAUDE_PLUGIN_DATA}/travel-profile.json` to load the user's travel profile. Follow the persistent-memory fallback chain: file first, then Claude's memory, then ask the user.
+2. **Also check Claude's memory** for any additional travel preferences or past feedback not in the file
 3. **Gather all requirements** — confirm with the user:
    - Destination (required)
    - Travel dates or approximate timing (required)
@@ -206,7 +206,7 @@ Present the complete plan in this structure:
 4. **Always run transport intelligence first** — don't default to flights without analysing the route
 5. **If children are travelling, always highlight fare savings** — "Kids ride free on DB trains" or "Child fare saves £X vs flights"
 6. **If the user said "entire trip planned out"** — include EVERYTHING: transport, accommodation, local transit, daily itinerary, practical info, and budget summary. Don't give a partial plan.
-7. **Save the trip plan** to `${CLAUDE_PLUGIN_DATA}/trips/[destination]-[date].json` for future reference
+7. **Use the Write tool** to save the trip plan to `${CLAUDE_PLUGIN_DATA}/trips/[destination]-[date].json` for future reference
 8. **Format all links as proper markdown** — `[Book on Ryanair](https://...)` — NOT angle brackets, NOT plain text, NOT `<Ryanair.com>`. This applies to booking links, accommodation links, and all URLs in the plan.
 
 ## Saving Trip Data

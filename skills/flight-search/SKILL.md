@@ -10,7 +10,10 @@ Search for flights using live MCP data with full quality verification.
 
 ## Before Searching
 
-1. **Read the user's travel profile** from `${CLAUDE_PLUGIN_DATA}/travel-profile.json`
+1. **Load the user's travel profile** using the persistent-memory fallback chain:
+   - Try reading `${CLAUDE_PLUGIN_DATA}/travel-profile.json` first
+   - If not found, check Claude's memory for travel profile facts
+   - If neither exists, ask the essential questions for this search
 2. **Confirm search parameters** with the user if any are missing:
    - Origin airport/city (use profile's `home_airport` as default)
    - Destination airport/city (required)
@@ -60,15 +63,16 @@ Present each flight option in this format:
 ```
 ### [NUMBER]. [AIRLINE] — [ORIGIN] to [DESTINATION]
 
-**Outbound:** [DATE] | Departs [TIME] → Arrives [TIME] ([DURATION])
-**Return:** [DATE] | Departs [TIME] → Arrives [TIME] ([DURATION])
+**Outbound:** [DATE] | Departs [TIME] -> Arrives [TIME] ([DURATION])
+**Return:** [DATE] | Departs [TIME] -> Arrives [TIME] ([DURATION])
 **Stops:** [Direct / N stop(s) via CITY]
 **Price:** [EXACT PRICE] per person | [TOTAL FOR ALL PASSENGERS] total
 **Verified:** [HH:MM today] via [Source]
 **Class:** [CABIN CLASS]
-**Booking:** [BOOKING LINK — see Booking Links section below]
+**Loyalty:** [If applicable: "Earns [N] [points currency] on [programme]" or "Alliance partner of [programme]"]
+**Book this flight:** [DEEP BOOKING LINK — see section below]
 
-> [One-sentence note on why this suits them — e.g., "Direct flight, matches your aisle seat preference"]
+> **Why this?** [Specific reasoning citing profile preferences, loyalty tier, transport rule, or price advantage]
 ```
 
 After all options:
@@ -80,29 +84,37 @@ Verify current prices and availability before booking.
 [If applicable: "Only [source] was available for pricing — not cross-checked."]
 ```
 
-## Booking Links
+## Deep Booking Links
 
-The Google Flights MCP returns a `booking_token`, NOT a booking URL. You MUST construct booking links manually for the user. ALWAYS include booking links — never present flights without a way to book.
+**ALWAYS generate deep links that take the user to the specific flight, not a generic homepage.** The Google Flights MCP returns a `booking_token`, NOT a booking URL. Construct deep booking links manually.
 
-For known airlines, construct direct booking links:
-- **Ryanair:** `[Book on Ryanair](https://www.ryanair.com/gb/en/trip/flights/select?adults=N&dateOut=YYYY-MM-DD&origin=XXX&destination=YYY)`
-- **easyJet:** `[Book on easyJet](https://www.easyjet.com/en/booking/select-flight?origin=XXX&destination=YYY&date=YYYY-MM-DD&adults=N)`
-- **British Airways:** `[Book on British Airways](https://www.britishairways.com/travel/book/public/en_gb?from=XXX&to=YYY&depDate=YYYY-MM-DD&adults=N)`
-- **For other airlines:** `[Book on Google Flights](https://www.google.com/travel/flights/booking?token=BOOKING_TOKEN)`
+For known airlines, construct deep links with dates, route, and passenger count pre-filled:
 
-Format ALL booking links as proper markdown: `[Book on Ryanair](https://...)` — NOT angle brackets, NOT plain text, NOT `<Ryanair.com>`.
+- **Ryanair:** `[Book this Ryanair flight](https://www.ryanair.com/gb/en/trip/flights/select?adults=N&teens=0&children=0&infants=0&dateOut=YYYY-MM-DD&dateIn=YYYY-MM-DD&isConnectedFlight=false&discount=0&isReturn=true&promoCode=&originIata=XXX&destinationIata=YYY)`
+- **easyJet:** `[Book this easyJet flight](https://www.easyjet.com/en/booking/select-flight?pid=www.easyjet.com&origin=XXX&destination=YYY&oday=DD&omonth=MM&oyear=YYYY&rday=DD&rmonth=MM&ryear=YYYY&adults=N&children=0&infants=0)`
+- **British Airways:** `[Book this BA flight](https://www.britishairways.com/travel/book/public/en_gb?from=XXX&to=YYY&depDate=YYYYMMDD&retDate=YYYYMMDD&cabin=M&adultCount=N&youngAdultCount=0&childCount=0&infantCount=0&eTicket=e)`
+  - If user has BA Executive Club number, append: `&eId=MEMBERSHIP_NUMBER`
+- **Wizz Air:** `[Book this Wizz Air flight](https://wizzair.com/en-gb/booking/select-flight/XXX/YYY/YYYY-MM-DD/YYYY-MM-DD/N/0/0/0)`
+- **Vueling:** `[Book this Vueling flight](https://www.vueling.com/en/booking/select?origin=XXX&destination=YYY&outboundDate=YYYY-MM-DD&inboundDate=YYYY-MM-DD&adults=N)`
+- **Lufthansa:** `[Book this Lufthansa flight](https://www.lufthansa.com/gb/en/flight-search?origin=XXX&destination=YYY&outDate=YYYY-MM-DD&inDate=YYYY-MM-DD&paxCombination=N-0-0-0-0)`
+- **KLM:** `[Book this KLM flight](https://www.klm.com/search/result?pax=N&cabin=ECONOMY&lang=en&origins=XXX&destinations=YYY&outDate=YYYY-MM-DD&inDate=YYYY-MM-DD)`
+- **For other airlines / fallback:** `[Book on Google Flights](https://www.google.com/travel/flights?q=Flights%20to%20YYY%20from%20XXX%20on%20YYYY-MM-DD)`
+
+**Format ALL booking links as proper markdown.** Never use angle brackets or plain text URLs.
+
+**Loyalty number inclusion:** When the user has a loyalty programme for the airline (or its alliance partner) and the booking URL supports it, include the membership number in the URL parameter. Mention it in the output: "Your [programme] number [XXXX] will be applied at booking."
 
 ## Preference Matching
 
 Apply the user's flight preferences:
-- **Preferred airlines** → prioritise, but still show alternatives if significantly cheaper
-- **Seat preference** → note in recommendation but this is chosen at booking
-- **Cabin class** → filter by preference, show upgrades only if within 30% price difference
-- **Direct flights preference** → if specified, exclude connections unless nothing direct exists (then note it)
+- **Preferred airlines** -> prioritise, but still show alternatives if significantly cheaper
+- **Seat preference** -> note in recommendation ("matches your window seat preference")
+- **Cabin class** -> filter by preference, show upgrades only if within 30% price difference
+- **Direct flights preference** -> if specified, exclude connections unless nothing direct exists (then note it)
 
 ## Special Handling
 
-- **"London" or "from London"** → search ALL major London airports: LHR (Heathrow), LGW (Gatwick), STN (Stansted), LTN (Luton), SEN (Southend), LCY (City). Present results grouped by airport with the best option highlighted. Only search a single airport if the user specifies one.
-- **Budget-conscious** → sort by price, highlight cheapest viable option
-- **Flexible dates** → if the MCP supports date range search, use it. Otherwise, search the target date +/- 2 days and present the cheapest option across those dates.
-- **Multi-city** → break into separate searches, present each leg clearly
+- **"London" or "from London"** -> search ALL major London airports: LHR (Heathrow), LGW (Gatwick), STN (Stansted), LTN (Luton), SEN (Southend), LCY (City). Present results grouped by airport with the best option highlighted. Only search a single airport if the user specifies one.
+- **Budget-conscious** -> sort by price, highlight cheapest viable option
+- **Flexible dates** -> if the MCP supports date range search, use it. Otherwise, search the target date +/- 2 days and present the cheapest option across those dates.
+- **Multi-city** -> break into separate searches, present each leg clearly

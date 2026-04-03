@@ -7,7 +7,7 @@ argument-hint: "[trip name or date range]"
 
 # Travel Expenses
 
-Generate an expense report from `${CLAUDE_PLUGIN_DATA}/expense-log.json`.
+Use the **Read tool** to load `${CLAUDE_PLUGIN_DATA}/expense-log.json`, then generate an expense report from its contents.
 
 ## What to include
 

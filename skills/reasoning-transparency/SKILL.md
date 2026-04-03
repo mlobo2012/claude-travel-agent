@@ -39,7 +39,7 @@ Always. Every single recommendation output by any skill must pass through this b
 
 Before composing any "Why this?" block, read and cross-reference:
 
-1. **User profile** — `${CLAUDE_PLUGIN_DATA}/travel-profile.json`
+1. **User profile** — use the **Read tool** on `${CLAUDE_PLUGIN_DATA}/travel-profile.json` (follow the persistent-memory fallback chain: file first, then Claude's memory, then ask the user)
    - `preferences` — explicit stated preferences
    - `derived_preferences.prefer` — learned positive signals
    - `derived_preferences.avoid` — learned negative signals
@@ -52,7 +52,7 @@ Before composing any "Why this?" block, read and cross-reference:
    - `dietary` — food restrictions or preferences
    - `accessibility` — mobility or accessibility needs
 
-2. **Reasoning effectiveness log** — `${CLAUDE_PLUGIN_DATA}/reasoning-effectiveness.json`
+2. **Reasoning effectiveness log** — use the **Read tool** on `${CLAUDE_PLUGIN_DATA}/reasoning-effectiveness.json`
    - Which reasoning factors the user has historically accepted vs overridden
    - Used to weight which factors to lead with
 
@@ -201,7 +201,7 @@ When a user overrides a recommendation or explicitly changes a preference during
 1. **Acknowledge the override clearly:**
    > "Got it — booking the Hilton despite the previous avoid flag. I'll update your profile."
 
-2. **Update `${CLAUDE_PLUGIN_DATA}/travel-profile.json`:**
+2. **Use the Read tool to load `${CLAUDE_PLUGIN_DATA}/travel-profile.json`, update the data, and use the Write tool to save it back:**
    - If overriding an "avoid" tag: do NOT remove it immediately. Instead, add a `softened` flag:
      ```json
      {
@@ -224,7 +224,7 @@ When a user overrides a recommendation or explicitly changes a preference during
 
 ## Learning Mechanism
 
-Track which reasoning resonates and which gets overridden. This data accumulates in `${CLAUDE_PLUGIN_DATA}/reasoning-effectiveness.json`.
+Track which reasoning resonates and which gets overridden. This data accumulates in `${CLAUDE_PLUGIN_DATA}/reasoning-effectiveness.json` (use the **Read tool** to load and the **Write tool** to save).
 
 ### Data Structure
 
@@ -421,7 +421,7 @@ Response: Do NOT become defensive. Acknowledge the external find, explain what f
 
 ## Initialising the Effectiveness Log
 
-On first activation (when `${CLAUDE_PLUGIN_DATA}/reasoning-effectiveness.json` does not exist), create it with this structure:
+On first activation (when the **Read tool** on `${CLAUDE_PLUGIN_DATA}/reasoning-effectiveness.json` returns a file-not-found error), use the **Write tool** to create it with this structure:
 
 ```json
 {
