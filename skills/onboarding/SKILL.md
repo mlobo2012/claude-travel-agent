@@ -19,7 +19,7 @@ If the user is asking a specific travel question (e.g., "find me flights to Sici
 2. Run the search immediately with those answers
 3. After presenting results, offer full onboarding: "Want me to save your preferences for next time? Run `/travel-setup` to set up your full travel profile."
 
-Only run the full 10-question onboarding below when the user explicitly asks for it (e.g., `/travel-setup`, "set up my travel preferences").
+Only run the full 12-question onboarding below when the user explicitly asks for it (e.g., `/travel-setup`, "set up my travel preferences").
 
 ## Full Onboarding Flow
 

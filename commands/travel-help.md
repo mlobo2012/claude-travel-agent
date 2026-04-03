@@ -55,7 +55,7 @@ Here are the commands available to you:
 - **Loyalty intelligence** — I auto-apply your loyalty programmes, track tier progress, and flag earning opportunities
 - **Post-booking monitoring** — After you book, I watch for price drops and alert you with net savings after cancellation fees
 - **Document scanning** — Upload receipts, boarding passes, and hotel bills to track expenses and update trip records
-- All prices are retrieved live from MCP servers (Airbnb, Google Flights, Public Transport, TfL, Ferryhopper)
+- All prices are retrieved live from MCP servers (Airbnb, Google Flights, TfL, Ferryhopper) and operator websites
 - Prices are cross-checked across sources when possible
 - Every price is timestamped — "Price as of [time] — verify at checkout"
 - Results are ranked using your personal preference profile (stored in persistent memory)

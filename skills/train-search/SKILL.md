@@ -24,25 +24,19 @@ Search for train routes using live MCP data with full quality verification.
 
 ## Search Execution
 
-### Primary Search: Public Transport MCP
+### Primary Search: Web Search
 
-Use the `public-transport` MCP server tools to search. Pass:
-- Origin and destination stations/cities
-- Travel dates
-- Number of passengers
-- Class preference
+Search for trains on the operator's direct website and rail booking platforms:
+- Eurostar: eurostar.com
+- UK National Rail: thetrainline.com, nationalrail.co.uk
+- Germany: bahn.de
+- France: sncf-connect.com
+- US: amtrak.com
+- Cross-platform: trainline.eu, omio.com
 
-### Cross-Check: Web Search
+### Cross-Check
 
-For top results from the MCP:
-- Cross-check via web search on the operator's direct website (e.g., eurostar.com, thetrainline.com, bahn.de, sncf-connect.com, amtrak.com)
-- Compare prices — flag discrepancies >5%
-
-### Fallback
-
-If the public-transport MCP is not connected or returns errors:
-- Use web search to find trains on Trainline, the operator's website, or rail booking platforms
-- Note that results are from web search, not MCP
+Cross-check the top results on at least one additional source (e.g., operator site vs Trainline) — flag price discrepancies >5%.
 
 ## Output Template
 
